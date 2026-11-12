@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>دليل تركيب أنظمة RED EDEN على شخصية Unity Third Person</title>
+<style>
+@page { size: A4; margin: 15mm 16mm; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #17212b; font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-size: 11pt; line-height: 1.55; direction: rtl; }
+h1, h2, h3 { color: #123047; line-height: 1.25; }
+h1 { font-size: 25pt; margin: 0 0 8mm; }
+h2 { font-size: 17pt; margin: 0 0 5mm; border-bottom: 2px solid #ca7a32; padding-bottom: 2mm; }
+h3 { font-size: 12.5pt; margin: 4mm 0 1.5mm; }
+p { margin: 0 0 3mm; }
+ul, ol { margin: 1mm 0 3mm; padding-right: 7mm; }
+li { margin: 1mm 0; }
+code, .ltr { direction: ltr; unicode-bidi: isolate; font-family: Consolas, monospace; }
+.cover { height: 260mm; display: flex; flex-direction: column; justify-content: center; }
+.eyebrow { color: #bd6926; font-weight: 700; font-size: 13pt; letter-spacing: .3px; }
+.subtitle { font-size: 15pt; color: #405565; }
+.note { border-right: 4px solid #ca7a32; background: #f3f6f7; padding: 3mm 4mm; margin: 3mm 0; }
+.warning { border-right-color: #b64236; background: #fff3f1; }
+.page { page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.small { font-size: 9.5pt; color: #44535e; }
+table { border-collapse: collapse; width: 100%; margin: 3mm 0; }
+th, td { border: 1px solid #b9c5cc; padding: 2mm; text-align: right; vertical-align: top; }
+th { background: #eaf0f3; }
+</style>
+</head>
+<body>
+<section class="page cover">
+  <p class="eyebrow">RED EDEN · دليل تركيب</p>
+  <h1>تركيب أنظمة اللاعب على Unity Third Person</h1>
+  <p class="subtitle">المخزون، التفاعل، التصنيع، الموارد، والصومعة الزراعية</p>
+  <div class="note">
+    <strong>الهدف:</strong> نقل أنظمة RED EDEN إلى شخصية جديدة مبنية على Unity Starter Assets — Third Person Controller، من دون استبدال حركة اللاعب أو الكاميرا الأصلية.
+  </div>
+  <p>إصدار المشروع المرجعي: <span class="ltr">Unity 6000.3.16f1</span></p>
+  <p>الحزمة الأساسية تعمل دون ARES. المساعد الصوتي/الذكي وحدة اختيارية موضحة في نهاية الدليل.</p>
+  <p class="small">يُفضّل تنفيذ الخطوات أولًا على نسخة احتياطية أو فرع تجريبي من المشروع.</p>
+</section>
+
+<section class="page">
+  <h2>١. ما الذي ستحتاجه؟</h2>
+  <ul>
+    <li>مشروع Unity يحتوي Unity Starter Assets — Third Person Controller، مع شخصية ومكوّنات الحركة والكاميرا الأصلية.</li>
+    <li>حزمة <span class="ltr">RedEden-Core.unitypackage</span>.</li>
+    <li>أنظمة Devion Inventory System وTriggers وUtilities وUI Widgets المتوافقة. الحزمة تحتوي الملفات اللازمة لمشروع جديد؛ إذا كانت Devion مثبتة مسبقًا، استخدم نسختك الحالية ولا تستورد نسخًا مكررة منها.</li>
+    <li>حزمة Unity Input System وتفعيلها من <span class="ltr">Project Settings &gt; Player &gt; Active Input Handling</span>.</li>
+  </ul>
+  <div class="note">
+    لا تستورد ولا تضف <span class="ltr">Devion Third Person Controller</span>. احتفظ بمكوّنات Unity Starter Assets مثل <span class="ltr">ThirdPersonController</span> و<span class="ltr">PlayerInput</span> و<span class="ltr">CharacterController</span> والكاميرا كما هي.
+  </div>
+  <h3>ترتيب الاستيراد</h3>
+  <ol>
+    <li>افتح المشروع المستهدف، وانتظر اكتمال استيراد الأصول وتجميع السكربتات.</li>
+    <li>استورد <span class="ltr">RedEden-Core.unitypackage</span>. عند وجود Devion مسبقًا، أزل تحديد مجلدات Devion المكررة من نافذة الاستيراد.</li>
+    <li>لا تستورد <span class="ltr">RedEden-ARES-Optional.unitypackage</span> الآن إلا إذا كنت تحتاج وظائف ARES.</li>
+    <li>تحقق من عدم وجود أخطاء تجميع في نافذة <span class="ltr">Console</span>.</li>
+  </ol>
+  <h3>إعدادات المشروع</h3>
+  <p>اجعل <span class="ltr">Active Input Handling</span> على <span class="ltr">Input System Package (New)</span>، ثم أعد تشغيل المحرر إذا طلب Unity ذلك. استخدم إعدادات التصادم الافتراضية المناسبة للعبة وتأكد من أن طبقات اللاعب ومحفزات التفاعل لا تمنع بعضها.</p>
+</section>
+
+<section class="page">
+  <h2>٢. إعداد اللاعب الجديد</h2>
+  <ol>
+    <li>استخدم شخصية Unity Third Person الموجودة في المشروع أو أنشئها من Starter Assets. لا تستبدل سكربتات الحركة والكاميرا.</li>
+    <li>عيّن Tag اللاعب إلى <span class="ltr">Player</span>؛ يجب أن يكون الاسم مطابقًا تمامًا.</li>
+    <li>احتفظ بـ <span class="ltr">CharacterController</span> ومكوّنات الإدخال والحركة الموجودة. لا تضف Devion Character Controller.</li>
+    <li>أضف <span class="ltr">InventoryManager</span> واحدًا إلى مشهد اللعب. يمكن أن يكون على كائن إدارة مستقل بدل كائن اللاعب.</li>
+    <li>أضف واجهة <span class="ltr">Inventory Window</span> من تثبيت Devion المرخّص لديك، واربطها وفق إعدادات Devion. الواجهة نفسها غير مضمنة في حزمة RED EDEN. يلزم وجود <span class="ltr">EventSystem</span> للواجهات التي تعتمد على النقر.</li>
+  </ol>
+  <div class="note">
+    التفاعل من Devion يعتمد على تعرّف <span class="ltr">InventoryManager.PlayerInfo</span> إلى اللاعب عبر Tag. إذا لم يكن Tag مضبوطًا، فلن تعمل حدود التفاعل كما هو متوقع.
+  </div>
+  <h3>قاعدة البيانات الصحيحة</h3>
+  <ol>
+    <li>في حقل قاعدة البيانات الرئيسية على <span class="ltr">InventoryManager</span>، عيّن <span class="ltr">RED EDEN Core Inventory Database.asset</span>.</li>
+    <li>في قائمة قواعد البيانات الفرعية، أضف <span class="ltr">RED EDEN Item Database.asset</span>.</li>
+    <li>اترك قواعد بيانات العناصر الأخرى المطلوبة للعبة ضمن القائمة الفرعية ولا تكرر قاعدة RED EDEN.</li>
+  </ol>
+  <div class="note warning">
+    لا تجعل <span class="ltr">RED EDEN Item Database.asset</span> القاعدة الرئيسية: فهي تحتوي عناصر اللعبة، لكن قائمة إعدادات Devion فيها فارغة. القاعدة الأساسية الجديدة تحتوي إعدادات Default وInput وUI وNotifications وSaving/Loading اللازمة للنظام.
+  </div>
+  <p>يمكن الاحتفاظ بأكثر من قاعدة عناصر فرعية. اجعل لكل عنصر معرفًا فريدًا، وتأكد أن عناصر الوصفات وعناصر المخزون تشير إلى الأصول نفسها.</p>
+</section>
+
+<section class="page">
+  <h2>٣. التفاعل والمخزون</h2>
+  <h3>المخزون</h3>
+  <ul>
+    <li>اختبر فتح نافذة المخزون وإغلاقها وإضافة عنصر تجريبي قبل تركيب المحطات.</li>
+    <li>عناصر RED EDEN مسجلة في قاعدة العناصر الفرعية؛ المخزون الفعلي يظل تابعًا لـ Devion.</li>
+    <li>إذا كانت النافذة فارغة، راجع قواعد البيانات المعيّنة في <span class="ltr">InventoryManager</span> وتأكد من وجود العنصر المطلوب في قاعدة فرعية نشطة.</li>
+  </ul>
+  <h3>محطات التصنيع وعقد الموارد</h3>
+  <ol>
+    <li>أضف <span class="ltr">RedEdenCraftingStation</span> إلى محطة الطباعة، وعيّن <span class="ltr">RED EDEN Crafting Database.asset</span>.</li>
+    <li>أضف Collider للمحطة واترك نطاق التفاعل الذي ينشئه Devion أو اضبط <span class="ltr">useDistance</span> من الـ Inspector.</li>
+    <li>أضف <span class="ltr">MartianResourceNode</span> إلى عقدة المورد، ثم عيّن تعريف المورد والكمية المتبقية.</li>
+    <li>تفاعل بالاقتراب والضغط على <strong>E</strong>. اضبط Tag اللاعب إلى <span class="ltr">Player</span> وتأكد أن التصادمات تسمح بوصول أحداث الـ Trigger.</li>
+  </ol>
+  <h3>الصومعة الزراعية</h3>
+  <p>بعد إعادة تصدير النموذج الصالح واستيراده، شغّل <span class="ltr">Mars &gt; Machines &gt; Create Hydroponic Farm</span> لإنشاء prefab. أضفه إلى المشهد، وتأكد أن <span class="ltr">InventoryManager</span> يستخدم القاعدة الأساسية والفرعية الموضحتين أعلاه. اضبط أوقات الإنتاج وكميات المحاصيل والأكسجين وحدود التخزين ونوع المحصول من الـ Inspector.</p>
+  <ul>
+    <li><strong>E:</strong> جمع الإنتاج المخزن.</li>
+    <li><strong>F:</strong> تبديل المحصول إذا فُعّل الخيار في إعدادات الصومعة.</li>
+  </ul>
+  <div class="note warning">
+    نموذج <span class="ltr">Hydroponic_Farm_M01.fbx</span> في المشروع المصدر أبلغ Unity عن تلف أثناء الاستيراد. استُبعد ملف FBX والـ prefab المعتمد عليه من الحزمة. أعد تصدير النموذج من المصدر، ثم شغّل أداة إنشاء الصومعة واختبر الـ prefab قبل اعتماد الشكل النهائي.
+  </div>
+</section>
+
+<section class="page">
+  <h2>٤. الحفظ والاختبار واستكشاف الأخطاء</h2>
+  <h3>الحفظ</h3>
+  <p>يعتمد المخزون على آلية الحفظ في Devion. تحفظ محطات RED EDEN وعقد الموارد والصومعة حالتها ومعرّفاتها الثابتة ضمن مسار حفظ المشهد. عند نسخ محطة أو عقدة، أنشئ معرّفًا ثابتًا جديدًا لكل نسخة قبل الاختبار.</p>
+  <h3>اختبار التركيب</h3>
+  <ol>
+    <li>شغّل المشهد وتأكد أن الشخصية تتحرك كما كانت قبل إضافة الأنظمة.</li>
+    <li>افتح واجهة المخزون وتأكد من ظهور عناصر RED EDEN عند إضافتها.</li>
+    <li>اقترب من محطة تصنيع واضغط E؛ جرّب وصفة بمواد كافية وأخرى غير متاحة.</li>
+    <li>اجمع موردًا من عقدة، ثم احفظ وأعد تحميل المشهد للتحقق من الكمية.</li>
+    <li>راقب الصومعة حتى تكتمل دورة إنتاج، واجمع المحصول أو الأكسجين.</li>
+    <li>شغّل اختبارات <span class="ltr">RedEden.Crafting</span> من <span class="ltr">Window &gt; General &gt; Test Runner</span>.</li>
+  </ol>
+  <table>
+    <thead><tr><th>العَرَض</th><th>ما يجب فحصه</th></tr></thead>
+    <tbody>
+      <tr><td>لا يظهر اللاعب داخل نطاق التفاعل</td><td>Tag = Player، وجود InventoryManager، Collider ونطاق التفاعل، وطبقات التصادم.</td></tr>
+      <tr><td>المخزون أو الإعدادات لا تعمل</td><td>القاعدة الرئيسية هي Core Inventory Database، وقاعدة RED EDEN ضمن القواعد الفرعية.</td></tr>
+      <tr><td>التفاعل لا يستجيب للمفتاح</td><td>Input System مفعّل؛ راجع مفتاح التفاعل المحدد على المحطة وإعدادات Devion.</td></tr>
+      <tr><td>لا تظهر الصومعة بالشكل المتوقع</td><td>أعد تصدير FBX من المصدر ثم حدّث prefab؛ النموذج الحالي معطوب في المشروع الأصلي.</td></tr>
+    </tbody>
+  </table>
+  <p class="small">لا تغيّر نظام الحركة لتجاوز مشكلة في المخزون أو التفاعل؛ افحص أولًا Tag وقاعدة البيانات وإعداد الإدخال.</p>
+</section>
+
+<section class="page">
+  <h2>٥. ARES الاختيارية</h2>
+  <p>ARES ليست شرطًا للمخزون أو التفاعل أو التصنيع. استورد <span class="ltr">RedEden-ARES-Optional.unitypackage</span> فقط إذا كان المشروع يحتاج الماسح أو المساعد أو الصوت.</p>
+  <h3>اعتماديات إضافية</h3>
+  <ul>
+    <li>حزمة Unity <span class="ltr">com.whisper.unity</span> المثبتة في المشروع المرجعي عبر Git URL.</li>
+    <li>خدمة Ollama محلية ونموذج مناسب؛ إعداد الخادم والعنوان والنموذج من ملفات إعداد ARES.</li>
+    <li>إذن الميكروفون عند تفعيل إدخال الصوت، وإعدادات إخراج الصوت عند استخدام الرد الصوتي.</li>
+  </ul>
+  <h3>إعداد الشخصية</h3>
+  <ol>
+    <li>أضف مكونات ARES المطلوبة على كائن مستقل أو اللاعب، واربط ملفات الإعدادات والموفرات من الـ Inspector.</li>
+    <li>يمكن إضافة <span class="ltr">ARESPlayerVitals</span> إلى الشخصية. عند عدم ربط <span class="ltr">StatsHandler</span> من Devion، يستخدم النظام قيم الحالة الاحتياطية؛ لا يغيّر هذا حركة Unity Third Person.</li>
+    <li>مفتاح تفاعل ARES في الإعداد الحالي هو <strong>V</strong>، بينما تفاعل محطات RED EDEN هو <strong>E</strong>.</li>
+    <li>اختبر ARES اختياريًا بعد التأكد من تشغيل الخادم المحلي والاعتماديات. لا تعتبر إعداد المساعد ناجحًا لمجرد نجاح بناء حزمة Core.</li>
+  </ol>
+  <div class="note warning">
+    أداة إعداد ARES الموجودة في المشروع الأصلي مرتبطة بمشهد الاختبار و<span class="ltr">StatsHandler</span> الخاص بـ Devion. لا تستخدمها على الشخصية الجديدة دون إعادة ربطها يدويًا. إضافة الصوت قد تتطلب تنزيل النموذج عند التشغيل.
+  </div>
+  <h3>ترخيص الأصول</h3>
+  <p>تتضمن الحزم ملفات Devion اللازمة للتكامل. يجب أن يملك كل من يستوردها صلاحية استخدام هذه الملفات وفق ترخيص Devion. لا تعِد نشر ملفات الطرف الثالث خارج نطاق الإذن الممنوح.</p>
+</section>
+</body>
+</html>
