@@ -5,6 +5,7 @@ import os
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -62,6 +63,28 @@ class SessionAuthenticationTests(unittest.TestCase):
 
 
 class LiveProtocolTests(unittest.TestCase):
+    def test_upstream_error_sanitizer_redacts_key_and_session_token(self):
+        api_key = "AIza" + "SyFakeTestCredentialValue000000000"
+        token = "headersegment.payloadsegment.signaturesegment"
+
+        sanitized = server._sanitize_upstream_message(f"{api_key} Bearer {token}")
+
+        self.assertNotIn(api_key, sanitized)
+        self.assertNotIn(token, sanitized)
+
+    def test_upstream_uri_uses_encoded_developer_api_key_query(self):
+        api_key = "test-key+/=&"
+        uri = server._build_upstream_ws_uri(api_key)
+        parsed_uri = urlsplit(uri)
+
+        self.assertEqual(parsed_uri.scheme, "wss")
+        self.assertEqual(parsed_uri.netloc, "generativelanguage.googleapis.com")
+        self.assertEqual(
+            parsed_uri.path,
+            "/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+        )
+        self.assertEqual(parse_qs(parsed_uri.query), {"key": [api_key]})
+
     def test_live_setup_is_audio_only_and_uses_allowlisted_read_only_tools(self):
         setup = server._build_live_setup("Egyptian Arabic")["setup"]
 
@@ -131,9 +154,37 @@ class FakeWebSocket:
 class FakeUpstream:
     def __init__(self):
         self.sent = []
+        self.close_code = None
 
     async def send(self, message):
         self.sent.append(json.loads(message))
+
+
+class FakeSetupFailureUpstream(FakeUpstream):
+    def __init__(self, response):
+        super().__init__()
+        self.response = response
+
+    async def recv(self):
+        return self.response
+
+    async def close(self):
+        pass
+
+
+class FakeSetupSuccessUpstream(FakeSetupFailureUpstream):
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        raise StopAsyncIteration
+
+
+class FakeHandshakeError(OSError):
+    def __init__(self, status_code, body):
+        super().__init__("handshake rejected")
+        self.status_code = status_code
+        self.response = SimpleNamespace(status_code=status_code, body=body)
 
 
 class FakeUpstreamMessages:
@@ -159,6 +210,9 @@ class EndpointWebSocket:
         self.accepted = False
         self.closed = False
 
+    async def receive(self):
+        return {"type": "websocket.disconnect"}
+
     async def accept(self):
         self.accepted = True
 
@@ -170,6 +224,147 @@ class EndpointWebSocket:
 
 
 class LiveRelayTests(unittest.IsolatedAsyncioTestCase):
+    async def test_setup_complete_is_required_before_ready(self):
+        with patch.dict(
+            os.environ,
+            {
+                "ARES_SESSION_SIGNING_KEY": "test-key-" + "x" * 48,
+                "GEMINI_API_KEY": "test-gemini-key",
+            },
+        ):
+            token = server._issue_session_token()["access_token"]
+            websocket = EndpointWebSocket("Bearer " + token, "test-upstream-setup-success")
+            upstream = FakeSetupSuccessUpstream('{"setupComplete":{}}')
+
+            async def connect(*args, **kwargs):
+                return upstream
+
+            with patch.object(server.websockets, "connect", new=connect):
+                with self.assertLogs("ares", level="INFO") as captured:
+                    await server.live_session(websocket)
+
+        ready_events = [event for event in websocket.sent_text if event.get("type") == "ready"]
+        self.assertEqual(len(ready_events), 1)
+        self.assertEqual(ready_events[0]["inputSampleRate"], 16_000)
+        self.assertEqual(ready_events[0]["outputSampleRate"], 24_000)
+        self.assertIn("setup_accepted=true", "\n".join(captured.output))
+
+    async def test_setup_error_logs_sanitized_protocol_diagnostics(self):
+        api_key = "test-gemini-key-that-must-not-be-logged"
+        with patch.dict(
+            os.environ,
+            {
+                "ARES_SESSION_SIGNING_KEY": "test-key-" + "x" * 48,
+                "GEMINI_API_KEY": api_key,
+            },
+        ):
+            token = server._issue_session_token()["access_token"]
+            websocket = EndpointWebSocket("Bearer " + token, "test-upstream-setup-error")
+            upstream = FakeSetupFailureUpstream(
+                json.dumps(
+                    {
+                        "error": {
+                            "code": 400,
+                            "status": "INVALID_ARGUMENT",
+                            "message": f"API key={api_key} Bearer {token}",
+                        }
+                    }
+                )
+            )
+            connection = {}
+
+            async def connect(uri, **kwargs):
+                connection["uri"] = uri
+                connection["kwargs"] = kwargs
+                return upstream
+
+            with patch.object(server.websockets, "connect", new=connect):
+                with self.assertLogs("ares", level="WARNING") as captured:
+                    await server.live_session(websocket)
+
+        self.assertEqual(parse_qs(urlsplit(connection["uri"]).query), {"key": [api_key]})
+        self.assertNotIn("extra_headers", connection["kwargs"])
+        self.assertIs(connection["kwargs"]["logger"], server._UPSTREAM_WS_LOGGER)
+        self.assertEqual(websocket.sent_text[0]["type"], "error")
+        log_output = "\n".join(captured.output)
+        self.assertIn("http_status=101", log_output)
+        self.assertIn("auth_accepted=accepted", log_output)
+        self.assertIn("setup_accepted=false", log_output)
+        self.assertIn("error_code=400", log_output)
+        self.assertIn("error_status=INVALID_ARGUMENT", log_output)
+        self.assertIn("api_version=v1beta", log_output)
+        self.assertIn("model=gemini-3.8-live", log_output)
+        self.assertNotIn(api_key, log_output)
+        self.assertNotIn(token, log_output)
+
+    async def test_handshake_rejection_logs_status_without_credentials(self):
+        api_key = "test-gemini-key-that-must-not-be-logged"
+        body = json.dumps(
+            {
+                "error": {
+                    "code": 403,
+                    "status": "PERMISSION_DENIED",
+                    "message": f"API key={api_key} is not permitted",
+                }
+            }
+        ).encode("utf-8")
+        with patch.dict(
+            os.environ,
+            {
+                "ARES_SESSION_SIGNING_KEY": "test-key-" + "x" * 48,
+                "GEMINI_API_KEY": api_key,
+            },
+        ):
+            token = server._issue_session_token()["access_token"]
+            websocket = EndpointWebSocket("Bearer " + token, "test-upstream-handshake-error")
+
+            async def fail_connect(*args, **kwargs):
+                raise FakeHandshakeError(403, body)
+
+            with patch.object(server.websockets, "connect", new=fail_connect):
+                with self.assertLogs("ares", level="WARNING") as captured:
+                    await server.live_session(websocket)
+
+        log_output = "\n".join(captured.output)
+        self.assertIn("http_status=403", log_output)
+        self.assertIn("auth_accepted=rejected", log_output)
+        self.assertIn("error_code=403", log_output)
+        self.assertIn("error_status=PERMISSION_DENIED", log_output)
+        self.assertNotIn(api_key, log_output)
+        self.assertNotIn(token, log_output)
+
+    async def test_upstream_close_code_is_recorded(self):
+        with patch.dict(
+            os.environ,
+            {
+                "ARES_SESSION_SIGNING_KEY": "test-key-" + "x" * 48,
+                "GEMINI_API_KEY": "test-gemini-key",
+            },
+        ):
+            token = server._issue_session_token()["access_token"]
+            websocket = EndpointWebSocket("Bearer " + token, "test-upstream-close")
+            upstream = FakeSetupFailureUpstream("")
+            close_error = server.websockets.exceptions.WebSocketException()
+            close_error.code = 1008
+            close_error.reason = "policy violation"
+
+            async def receive_close():
+                raise close_error
+
+            upstream.recv = receive_close
+
+            async def connect(*args, **kwargs):
+                return upstream
+
+            with patch.object(server.websockets, "connect", new=connect):
+                with self.assertLogs("ares", level="WARNING") as captured:
+                    await server.live_session(websocket)
+
+        log_output = "\n".join(captured.output)
+        self.assertIn("http_status=101", log_output)
+        self.assertIn("close_code=1008", log_output)
+        self.assertIn("auth_accepted=accepted", log_output)
+
     async def test_binary_pcm_activity_archive_context_and_tool_responses_are_validated(self):
         audio = b"\x01\x00" * 320
         pending = {"tool-1": "get_inventory"}

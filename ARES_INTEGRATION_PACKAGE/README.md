@@ -13,6 +13,7 @@ This package contains the ARES Unity runtime, a secure FastAPI-to-Gemini Live We
 ## Security model
 
 - `GEMINI_API_KEY` and `ARES_SESSION_SIGNING_KEY` are backend-only environment secrets. They are never embedded in Unity assets or client builds.
+- The backend authenticates its Gemini Developer API WebSocket with the server-side `key` query parameter; its credential-bearing upstream URL is never sent to Unity or written to application logs.
 - Unity requests an anonymous, HMAC-signed bearer session that expires after five minutes. This temporary session token is extractable from a distributed client but cannot reveal the Gemini key and is not treated as a secure secret.
 - Anonymous sessions do not prove player identity. Add verification of your platform-issued identity token before launch if requests must be limited to known players.
 - The backend uses a fixed model, read-only function allowlist, bounded messages, and per-IP/process capacity controls. For public/multi-instance deployments, configure shared gateway rate limits and connection limits.

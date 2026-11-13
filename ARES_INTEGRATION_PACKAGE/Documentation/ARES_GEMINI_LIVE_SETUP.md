@@ -20,6 +20,13 @@ ARES uses a native, full-duplex Gemini Live WebSocket session. Unity streams mic
 
 There is no `GEMINI_MODEL` setting: model selection and tool definitions remain backend-controlled. Never place either secret in Unity configuration, a Unity build, command-line arguments, logs, or source control.
 
+## Upstream Developer API connection
+
+- The backend uses the Gemini Developer API WebSocket endpoint `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent` and the fixed `gemini-3.8-live` model.
+- Developer API authentication is sent using Google's `key` query parameter on the backend's upstream TLS WebSocket. This is separate from the five-minute ARES bearer token Unity presents to the backend; neither the Gemini key nor the upstream URL is sent to Unity.
+- The backend suppresses the WebSocket library's internal logging because the upstream URL contains the credential. Its own diagnostics log only the endpoint without query, API version, model, handshake/close status, whether authentication and setup were accepted, and sanitized upstream errors. Client-facing errors remain generic.
+- In Render, set the exact variable `GEMINI_API_KEY` to a valid Gemini Developer API key with Live access for the selected model. Check that the key's API restrictions allow the Generative Language API and that any application restriction permits server-side Render traffic. Do not send the key or session tokens in chat or reports.
+
 ## Deployment and service access
 
 See the [installation guide](../INSTALLATION_GUIDE.md) for copy-and-paste Windows and Render steps. The included `render.yaml` can be selected as the Blueprint file during Render setup. It defines a Free service for testing; Render Free web services can sleep after 15 minutes without inbound traffic, take about a minute to start, and may restart. A Live WebSocket is not guaranteed to survive deploys or platform restarts. Use a paid service and gateway-backed rate/concurrency controls for production.
@@ -29,6 +36,10 @@ See the [installation guide](../INSTALLATION_GUIDE.md) for copy-and-paste Window
 Unity requests a five-minute HMAC-signed anonymous session, then presents it as a bearer token in the WebSocket handshake. The backend validates it before accepting the socket and uses the Gemini API key only in the upstream server-to-server connection. Session tokens are temporary access credentials, not secure secrets; a player can extract one from a running/distributed client, but it expires quickly and cannot reveal the Gemini key.
 
 The session is anonymous and does not prove player identity. Add verification of a platform-issued identity token and enforce per-player quotas before public launch or per-player billing.
+
+## Upstream failure diagnostics
+
+The backend server logs contain a sanitized `Gemini Live upstream` diagnostic for connection, setup, and relay failures. It includes the configured endpoint/API version/model, upstream HTTP status when available, WebSocket close code, authentication/setup acceptance state, and a sanitized error status/message. Gemini keys, ARES bearer tokens, authorization headers, full request payloads, and credential-bearing URLs are not logged or returned to Unity. A successful health check or ARES session issuance does not prove that the upstream Gemini Live connection succeeded; only the actual `setupComplete` event marks setup accepted.
 
 ## Verification limits
 

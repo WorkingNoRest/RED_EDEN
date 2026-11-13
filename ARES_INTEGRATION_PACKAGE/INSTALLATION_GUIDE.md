@@ -75,7 +75,7 @@ The Unity live endpoint is `/api/ares/live`. It receives a bearer token in the W
 1. Push the package branch to a Git provider connected to Render.
 2. In Render, choose **New > Blueprint** and select the repository. During Blueprint setup, set the Blueprint file path to `ARES_INTEGRATION_PACKAGE/render.yaml`.
 3. Review the service: `render.yaml` selects a single-instance Free web service with the backend directory as its root, a `/health` check, and the required WebSocket message-size limit.
-4. Set `GEMINI_API_KEY` as a secret environment variable in Render. The Blueprint generates `ARES_SESSION_SIGNING_KEY`; do not replace it with a committed value.
+4. Set `GEMINI_API_KEY` as a secret environment variable in Render. It must be a Google Gemini Developer API key for a project with access to `gemini-3.8-live`; ensure its API restrictions allow the Generative Language API and its application restrictions allow requests from the Render service. If using IP restrictions, account for the service's outbound egress. The Blueprint generates `ARES_SESSION_SIGNING_KEY`; do not replace it with a committed value.
 5. Deploy and copy the service origin (for example, `https://ares-gemini-live.onrender.com`) into the Unity Live configuration asset. Do not add a trailing path or API key.
 6. Wait for the service to finish its first deploy before opening the Unity scene.
 
@@ -87,7 +87,8 @@ The in-memory session limiter, per-IP WebSocket attempt limiter, and concurrent-
 
 - Unity obtains a server-signed bearer session from `POST /api/ares/session`. Tokens expire in five minutes and are not permanent client secrets.
 - The session is anonymous. Anyone who can reach the public session endpoint can request a session; a modified client can also extract and replay a live token until it expires. This does **not** make the token a secure secret or prove player identity.
-- The Gemini API key is used only by the backend on the upstream TLS WebSocket. The upstream URL does not contain the key; Unity never receives it.
+- The Gemini API key is used only by the backend on the upstream TLS WebSocket, using Google's Developer API `key` query parameter. This authenticated URL is server-to-server only; Unity never receives it. Internal WebSocket protocol logging is disabled to prevent the credential-bearing URL from being logged.
+- The backend records safe upstream diagnostics in its server logs: endpoint, API version, fixed model, handshake status, close code, authentication/setup acceptance, and sanitized Google error status/message. It never returns those details to Unity or logs credentials, bearer tokens, request payloads, or the upstream query URL.
 - The service limits session creation to five requests per IP/minute; Live WebSocket handshakes to six attempts per IP/minute; concurrent Live sessions to two per IP and sixteen per process; incoming client messages to 3,600/minute; audio chunks to 3,200 bytes; and JSON control messages to 16 KiB.
 - These are baseline abuse controls, not authorization or a substitute for account identity, shared gateway limits, monitoring, and spend controls. Verify your game's platform-issued identity token before allowing broad public access or per-player billing.
 
@@ -108,5 +109,6 @@ The in-memory session limiter, per-IP WebSocket attempt limiter, and concurrent-
 - `401` / WebSocket policy close: the session token is missing, invalid, or expired; reconnect to request a new one.
 - `1013` / capacity message: the per-IP/process Live limit or handshake rate limit was reached; wait and retry.
 - `Gemini Live is unavailable or not enabled for this API project`: verify the backend API key, billing/project configuration, and Live API access for that Google project. Account entitlement is not inferred from documentation alone.
+- For upstream setup failures, inspect the Render service logs for the sanitized `Gemini Live upstream` diagnostic. Confirm that `GEMINI_API_KEY` is present, valid, restricted to the Generative Language API as appropriate, and permitted for server-side Render requests. Never paste the key or a session token into chat, GitHub, source files, or a support report.
 - No microphone/audio: confirm the microphone provider implements streaming, the client has an `ARESAudioPlayer` assigned, microphone permissions are granted, and the target supports `ClientWebSocket`.
 - Unity Live does not compile: check the Unity Input System, `com.whisper.unity`, RED EDEN/Devion references, and the target's .NET API compatibility.

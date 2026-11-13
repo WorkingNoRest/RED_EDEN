@@ -5,6 +5,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import secrets
 import threading
 import time
@@ -12,6 +13,7 @@ import uuid
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any, Deque, Dict, Optional, Tuple
+from urllib.parse import urlencode
 
 import websockets
 from dotenv import load_dotenv
@@ -38,10 +40,15 @@ MAX_LIVE_ATTEMPTS_PER_MINUTE = 6
 MAX_MESSAGES_PER_MINUTE = 3_600
 MAX_PENDING_TOOL_CALLS = 4
 LIVE_MODEL = "gemini-3.8-live"
+UPSTREAM_API_VERSION = "v1beta"
 UPSTREAM_WS_URL = (
     "wss://generativelanguage.googleapis.com/ws/"
-    "google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
+    "google.ai.generativelanguage."
+    + UPSTREAM_API_VERSION
+    + ".GenerativeService.BidiGenerateContent"
 )
+_UPSTREAM_WS_LOGGER = logging.getLogger("ares.upstream.websocket")
+_UPSTREAM_WS_LOGGER.setLevel(logging.CRITICAL + 1)
 ALLOWED_LIVE_TOOLS = {
     "get_player_status",
     "get_inventory",
@@ -66,6 +73,114 @@ _live_active_total = 0
 
 class RequestTooLarge(Exception):
     pass
+
+
+def _build_upstream_ws_uri(api_key: str) -> str:
+    return UPSTREAM_WS_URL + "?" + urlencode({"key": api_key})
+
+
+def _sanitize_upstream_message(message: Any) -> str:
+    if not isinstance(message, str):
+        return ""
+    sanitized = " ".join(message.split())
+    sanitized = re.sub(r"AIza[A-Za-z0-9_-]{20,}", "[REDACTED]", sanitized)
+    sanitized = re.sub(
+        r"(?i)(x-goog-api-key|api[_ -]?key|authorization|access[_ -]?token|key)\s*[:=]\s*[^,\s;&]+",
+        r"\1=[REDACTED]",
+        sanitized,
+    )
+    sanitized = re.sub(r"(?i)\bbearer\s+[^,\s;]+", "Bearer [REDACTED]", sanitized)
+    sanitized = re.sub(
+        r"(?<![A-Za-z0-9_-])[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}(?![A-Za-z0-9_-])",
+        "[REDACTED]",
+        sanitized,
+    )
+    return sanitized[:500]
+
+
+def _upstream_error_details(payload: Dict[str, Any]) -> Tuple[Optional[int], Optional[str], str]:
+    error = payload.get("error")
+    if not isinstance(error, dict):
+        return None, None, ""
+
+    code = error.get("code")
+    if not isinstance(code, int) or isinstance(code, bool):
+        code = None
+    status_text = error.get("status")
+    if not isinstance(status_text, str):
+        status_text = None
+    return code, status_text, _sanitize_upstream_message(error.get("message"))
+
+
+def _upstream_http_status(exception: Exception) -> Optional[int]:
+    response = getattr(exception, "response", None)
+    value = getattr(response, "status_code", None)
+    if value is None:
+        value = getattr(exception, "status_code", None)
+    return value if isinstance(value, int) and 100 <= value <= 599 else None
+
+
+def _upstream_close_details(exception: Exception) -> Tuple[Optional[int], str]:
+    received = getattr(exception, "rcvd", None)
+    code = getattr(received, "code", None)
+    if code is None:
+        code = getattr(exception, "code", None)
+    reason = getattr(received, "reason", None)
+    if reason is None:
+        reason = getattr(exception, "reason", None)
+    return (code if isinstance(code, int) else None, _sanitize_upstream_message(reason))
+
+
+def _log_upstream_diagnostic(
+    stage: str,
+    *,
+    http_status: Optional[int] = None,
+    close_code: Optional[int] = None,
+    auth_accepted: Optional[bool] = None,
+    setup_accepted: bool = False,
+    error_code: Optional[int] = None,
+    error_status: Optional[str] = None,
+    message: str = "",
+    level: int = logging.WARNING,
+) -> None:
+    auth_result = "unknown" if auth_accepted is None else ("accepted" if auth_accepted else "rejected")
+    safe_status = _sanitize_upstream_message(error_status) or "unknown"
+    safe_message = _sanitize_upstream_message(message) or "none"
+    logger.log(
+        level,
+        "Gemini Live upstream stage=%s endpoint=%s api_version=%s model=%s "
+        "http_status=%s close_code=%s auth_accepted=%s setup_accepted=%s "
+        "error_code=%s error_status=%s message=%s",
+        stage,
+        UPSTREAM_WS_URL,
+        UPSTREAM_API_VERSION,
+        LIVE_MODEL,
+        http_status if http_status is not None else "unknown",
+        close_code if close_code is not None else "unknown",
+        auth_result,
+        str(setup_accepted).lower(),
+        error_code if error_code is not None else "unknown",
+        safe_status,
+        safe_message,
+    )
+
+
+def _handshake_error_details(exception: Exception) -> Tuple[Optional[int], Optional[str], str]:
+    response = getattr(exception, "response", None)
+    body = getattr(response, "body", None)
+    if isinstance(body, bytes):
+        try:
+            payload = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            payload = None
+        if isinstance(payload, dict):
+            return _upstream_error_details(payload)
+
+    status_code = _upstream_http_status(exception)
+    if status_code is not None:
+        return None, None, "Gemini Live WebSocket handshake rejected."
+    _, reason = _upstream_close_details(exception)
+    return None, None, reason or type(exception).__name__
 
 
 class RequestSizeLimitMiddleware:
@@ -472,6 +587,17 @@ async def _upstream_to_client(websocket: WebSocket, upstream, pending_tool_calls
         if not isinstance(message, dict):
             raise ValueError("Invalid upstream message.")
         if "error" in message:
+            error_code, error_status, error_message = _upstream_error_details(message)
+            _log_upstream_diagnostic(
+                "relay",
+                http_status=101,
+                close_code=getattr(upstream, "close_code", None),
+                auth_accepted=True,
+                setup_accepted=True,
+                error_code=error_code,
+                error_status=error_status,
+                message=error_message,
+            )
             raise RuntimeError("Gemini Live returned an upstream error.")
 
         server_content = message.get("serverContent")
@@ -577,27 +703,76 @@ async def live_session(websocket: WebSocket) -> None:
 
     await websocket.accept()
     upstream = None
+    upstream_setup_accepted = False
     tasks = set()
     try:
         upstream = await websockets.connect(
-            UPSTREAM_WS_URL,
-            extra_headers={"x-goog-api-key": api_key},
+            _build_upstream_ws_uri(api_key),
+            logger=_UPSTREAM_WS_LOGGER,
             open_timeout=10,
             close_timeout=3,
             ping_interval=20,
             ping_timeout=20,
             max_size=1_048_576,
         )
+        _log_upstream_diagnostic(
+            "websocket_open",
+            http_status=101,
+            auth_accepted=True,
+            setup_accepted=False,
+            level=logging.INFO,
+        )
         await upstream.send(json.dumps(setup, separators=(",", ":"), ensure_ascii=False))
         setup_reply = await asyncio.wait_for(upstream.recv(), timeout=15)
         if not isinstance(setup_reply, str):
+            _log_upstream_diagnostic(
+                "setup",
+                http_status=101,
+                close_code=getattr(upstream, "close_code", None),
+                auth_accepted=True,
+                message="Expected a text setup response from Gemini Live.",
+            )
             raise RuntimeError("Gemini Live setup failed.")
         try:
             parsed_setup_reply = json.loads(setup_reply)
         except json.JSONDecodeError as exception:
+            _log_upstream_diagnostic(
+                "setup",
+                http_status=101,
+                close_code=getattr(upstream, "close_code", None),
+                auth_accepted=True,
+                message="Gemini Live returned invalid JSON during setup.",
+            )
             raise RuntimeError("Gemini Live setup failed.") from exception
-        if not isinstance(parsed_setup_reply, dict) or "setupComplete" not in parsed_setup_reply:
+        if isinstance(parsed_setup_reply, dict) and "error" in parsed_setup_reply:
+            error_code, error_status, error_message = _upstream_error_details(parsed_setup_reply)
+            _log_upstream_diagnostic(
+                "setup",
+                http_status=101,
+                close_code=getattr(upstream, "close_code", None),
+                auth_accepted=True,
+                error_code=error_code,
+                error_status=error_status,
+                message=error_message or "Gemini Live rejected the setup message.",
+            )
             raise RuntimeError("Gemini Live setup failed.")
+        if not isinstance(parsed_setup_reply, dict) or "setupComplete" not in parsed_setup_reply:
+            _log_upstream_diagnostic(
+                "setup",
+                http_status=101,
+                close_code=getattr(upstream, "close_code", None),
+                auth_accepted=True,
+                message="Gemini Live did not return setupComplete.",
+            )
+            raise RuntimeError("Gemini Live setup failed.")
+        upstream_setup_accepted = True
+        _log_upstream_diagnostic(
+            "setup_complete",
+            http_status=101,
+            auth_accepted=True,
+            setup_accepted=True,
+            level=logging.INFO,
+        )
 
         await websocket.send_text(
             json.dumps(
@@ -632,6 +807,14 @@ async def live_session(websocket: WebSocket) -> None:
             if exception is not None and not isinstance(exception, asyncio.CancelledError):
                 raise exception
     except asyncio.TimeoutError:
+        _log_upstream_diagnostic(
+            "setup" if not upstream_setup_accepted else "session",
+            http_status=101 if upstream is not None else None,
+            close_code=getattr(upstream, "close_code", None) if upstream is not None else None,
+            auth_accepted=True if upstream is not None else None,
+            setup_accepted=upstream_setup_accepted,
+            message="Timed out while waiting for the upstream WebSocket.",
+        )
         await _send_client_error(websocket, "Gemini Live setup or connection timed out.")
     except (ValueError, RuntimeError) as exception:
         logger.warning("ARES Live session ended: %s", type(exception).__name__)
@@ -640,7 +823,24 @@ async def live_session(websocket: WebSocket) -> None:
         except (WebSocketDisconnect, OSError, RuntimeError):
             logger.info("ARES client disconnected while receiving an error notification.")
     except (websockets.exceptions.WebSocketException, OSError, asyncio.TimeoutError) as exception:
-        logger.warning("ARES Live upstream failure: %s", type(exception).__name__)
+        status_code = _upstream_http_status(exception)
+        error_code, error_status, error_message = _handshake_error_details(exception)
+        close_code, close_reason = _upstream_close_details(exception)
+        auth_accepted = True if upstream is not None else (False if status_code in (401, 403) else None)
+        _log_upstream_diagnostic(
+            "relay" if upstream_setup_accepted else "connect",
+            http_status=101 if upstream is not None else status_code,
+            close_code=(
+                close_code
+                if close_code is not None
+                else (getattr(upstream, "close_code", None) if upstream is not None else None)
+            ),
+            auth_accepted=auth_accepted,
+            setup_accepted=upstream_setup_accepted,
+            error_code=error_code,
+            error_status=error_status,
+            message=close_reason or error_message,
+        )
         try:
             await _send_client_error(websocket, "Gemini Live is unavailable or not enabled for this API project.")
         except (WebSocketDisconnect, OSError, RuntimeError):
