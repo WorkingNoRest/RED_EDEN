@@ -301,6 +301,42 @@ class EndpointWebSocket:
 
 
 class LiveRelayTests(unittest.IsolatedAsyncioTestCase):
+    async def test_upstream_utf8_binary_json_frame_is_relayed(self):
+        websocket = FakeWebSocket([])
+        upstream = FakeUpstreamMessages([b'{"serverContent":{"turnComplete":true}}'])
+
+        await server._upstream_to_client(websocket, upstream, {})
+
+        self.assertEqual(
+            [json.loads(message) for message in websocket.sent_text],
+            [{"type": "turn_complete"}],
+        )
+
+    async def test_upstream_binary_frame_validation_is_specific_and_bounded(self):
+        invalid_utf8 = FakeUpstreamMessages([b"\xff"])
+        with self.assertRaisesRegex(ValueError, "Upstream message is not valid UTF-8.") as error:
+            await server._upstream_to_client(FakeWebSocket([]), invalid_utf8, {})
+        self.assertEqual(
+            server._live_value_error_diagnostic(error.exception),
+            ("upstream", "invalid_upstream_utf8"),
+        )
+
+        oversized = FakeUpstreamMessages([b" " * (server.MAX_UPSTREAM_MESSAGE_BYTES + 1)])
+        with self.assertRaisesRegex(ValueError, "Upstream message exceeds the size limit.") as error:
+            await server._upstream_to_client(FakeWebSocket([]), oversized, {})
+        self.assertEqual(
+            server._live_value_error_diagnostic(error.exception),
+            ("upstream", "upstream_message_too_large"),
+        )
+
+        oversized_text = FakeUpstreamMessages([" " * (server.MAX_UPSTREAM_MESSAGE_BYTES + 1)])
+        with self.assertRaisesRegex(ValueError, "Upstream message exceeds the size limit.") as error:
+            await server._upstream_to_client(FakeWebSocket([]), oversized_text, {})
+        self.assertEqual(
+            server._live_value_error_diagnostic(error.exception),
+            ("upstream", "upstream_message_too_large"),
+        )
+
     async def test_setup_complete_is_required_before_ready(self):
         with patch.dict(
             os.environ,

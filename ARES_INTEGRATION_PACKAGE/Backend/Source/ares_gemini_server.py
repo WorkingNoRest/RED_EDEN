@@ -38,6 +38,7 @@ MAX_LIVE_SESSIONS = 16
 MAX_LIVE_SESSIONS_PER_IP = 2
 MAX_LIVE_ATTEMPTS_PER_MINUTE = 6
 MAX_MESSAGES_PER_MINUTE = 3_600
+MAX_UPSTREAM_MESSAGE_BYTES = 1_048_576
 MAX_PENDING_TOOL_CALLS = 4
 LIVE_MODEL = "gemini-3.8-live"
 UPSTREAM_API_VERSION = "v1beta"
@@ -70,7 +71,9 @@ _LIVE_VALUE_ERROR_DIAGNOSTICS = {
     "Tool response is too large.": ("client_control", "tool_response_too_large"),
     "Unsupported control message type.": ("client_control", "unsupported_control_type"),
     "Unsupported WebSocket message.": ("client", "unsupported_websocket_message"),
-    "Invalid upstream message size.": ("upstream", "invalid_upstream_frame_size"),
+    "Upstream message exceeds the size limit.": ("upstream", "upstream_message_too_large"),
+    "Upstream message is not valid UTF-8.": ("upstream", "invalid_upstream_utf8"),
+    "Unsupported upstream frame type.": ("upstream", "unsupported_upstream_frame"),
     "Invalid upstream message.": ("upstream", "invalid_upstream_json"),
     "Invalid upstream audio.": ("upstream_audio", "invalid_audio_encoding"),
     "Invalid upstream audio size.": ("upstream_audio", "invalid_audio_size"),
@@ -711,10 +714,21 @@ async def _client_to_upstream(
 async def _upstream_to_client(websocket: WebSocket, upstream, pending_tool_calls: Dict[str, str]) -> None:
     speaking = False
     async for raw_message in upstream:
-        if not isinstance(raw_message, str) or len(raw_message.encode("utf-8")) > 1_048_576:
-            raise ValueError("Invalid upstream message size.")
+        if isinstance(raw_message, str):
+            if len(raw_message.encode("utf-8")) > MAX_UPSTREAM_MESSAGE_BYTES:
+                raise ValueError("Upstream message exceeds the size limit.")
+            message_text = raw_message
+        elif isinstance(raw_message, bytes):
+            if len(raw_message) > MAX_UPSTREAM_MESSAGE_BYTES:
+                raise ValueError("Upstream message exceeds the size limit.")
+            try:
+                message_text = raw_message.decode("utf-8")
+            except UnicodeDecodeError as exception:
+                raise ValueError("Upstream message is not valid UTF-8.") from exception
+        else:
+            raise ValueError("Unsupported upstream frame type.")
         try:
-            message = json.loads(raw_message)
+            message = json.loads(message_text)
         except json.JSONDecodeError as exception:
             raise ValueError("Invalid upstream message.") from exception
         if not isinstance(message, dict):
@@ -846,7 +860,7 @@ async def live_session(websocket: WebSocket) -> None:
             close_timeout=3,
             ping_interval=20,
             ping_timeout=20,
-            max_size=1_048_576,
+            max_size=MAX_UPSTREAM_MESSAGE_BYTES,
         )
         _log_upstream_diagnostic(
             "websocket_open",
