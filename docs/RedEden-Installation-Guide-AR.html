@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>RED EDEN — دليل تركيب أنظمة Unity</title>
+<style>
+@page { size: A4; margin: 15mm 16mm; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #17212b; font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; direction: rtl; }
+h1, h2, h3 { color: #123047; line-height: 1.25; }
+h1 { font-size: 24pt; margin: 0 0 8mm; }
+h2 { font-size: 16pt; margin: 0 0 4mm; border-bottom: 2px solid #ca7a32; padding-bottom: 2mm; }
+h3 { font-size: 12pt; margin: 4mm 0 1.5mm; }
+p { margin: 0 0 2.5mm; }
+ul, ol { margin: 1mm 0 3mm; padding-right: 7mm; }
+li { margin: .8mm 0; }
+code, .ltr { direction: ltr; unicode-bidi: isolate; font-family: Consolas, monospace; }
+.page { page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.cover { min-height: 255mm; display: flex; flex-direction: column; justify-content: center; }
+.eyebrow { color: #bd6926; font-weight: 700; font-size: 13pt; }
+.subtitle { font-size: 14pt; color: #405565; }
+.note { border-right: 4px solid #ca7a32; background: #f3f6f7; padding: 3mm 4mm; margin: 3mm 0; }
+.warning { border-right-color: #b64236; background: #fff3f1; }
+.small { font-size: 9pt; color: #44535e; }
+table { border-collapse: collapse; width: 100%; margin: 3mm 0; }
+th, td { border: 1px solid #b9c5cc; padding: 2mm; text-align: right; vertical-align: top; }
+th { background: #eaf0f3; }
+</style>
+</head>
+<body>
+<section class="page cover">
+  <p class="eyebrow">RED EDEN · دليل تركيب</p>
+  <h1>تركيب الأنظمة على Unity Third Person</h1>
+  <p class="subtitle">المخزون، التفاعل، التصنيع، الموارد، الصومعة الزراعية، وARES Gemini Live</p>
+  <div class="note"><strong>الهدف:</strong> استيراد أنظمة RED EDEN إلى مشروع Unity آخر وربطها بلاعب موجود، من دون استبدال حركة الشخصية أو الكاميرا.</div>
+  <p>الإصدار المرجعي: <span class="ltr">Unity 6000.3.16f1</span></p>
+  <p>ملف الاستيراد: <span class="ltr">packages/RedEden-Full-System.unitypackage</span></p>
+  <p class="small">هذا الدليل لا يضمن اتصال Gemini Live؛ تحقق من حالة النشر والاختبارات في المستودع قبل الاستخدام.</p>
+</section>
+<section class="page">
+  <h2>١. المتطلبات والاستيراد</h2>
+  <ul>
+    <li>Unity 6 متوافق، وUnity Input System إصدار 1.19.0 أو أحدث متوافق.</li>
+    <li>تثبيت Devion المرخّص: Inventory System وStat System وTriggers وUtilities وUI Widgets. يجب تثبيتها من حساب المطور المرخّص؛ لا تتضمن حزمة RED EDEN كود Devion أو واجهاته أو أمثلته.</li>
+    <li>أبقِ Unity Starter Assets — Third Person Controller في المشروع الهدف كما هي. ARES اختياري ويتطلب Backend Gemini Live.</li>
+  </ul>
+  <ol>
+    <li>أنشئ نسخة احتياطية من مشروعك، وتأكد من وجود الاعتماديات المرخصة أولًا.</li>
+    <li>ادمج اعتمادي Input System وURP من <span class="ltr">ARES_INTEGRATION_PACKAGE/Unity/manifest-dependencies.json</span> في <span class="ltr">Packages/manifest.json</span> الموجود؛ لا تستبدل ملف manifest.</li>
+    <li>من Unity اختر <span class="ltr">Assets &gt; Import Package &gt; Custom Package...</span>، ثم حدد <span class="ltr">RedEden-Full-System.unitypackage</span> واستورد الملفات.</li>
+    <li>انتظر انتهاء التجميع وافحص Console. أخطاء Devion تعني عادةً أن الإصدار المرخص غير مثبت أو غير متوافق؛ لا تستورد ملفات Devion مكررة من الحزمة.</li>
+  </ol>
+  <div class="note warning">الحزمة لا تستورد مشهد الاختبار أو لاعبًا إلزاميًا، ولا تستبدل حركة اللاعب أو الكاميرا. لا تجمع بين الاستيراد الكامل والنسخ اليدوي للمجلدات في نفس المشروع.</div>
+  <h3>التحقق من قواعد البيانات</h3>
+  <p>تأكد من وجود <span class="ltr">RED EDEN Core Inventory Database.asset</span> و<span class="ltr">RED EDEN Item Database.asset</span> و<span class="ltr">RED EDEN Crafting Database.asset</span>. افتح الأصول من Project وتحقق من ظهور بياناتها دون Missing References. لا تحذف ملفات <span class="ltr">.meta</span> ولا تنقل الأصول بعد الاستيراد.</p>
+</section>
+<section class="page">
+  <h2>٢. اللاعب والمخزون والتفاعل</h2>
+  <h3>حافظ على اللاعب الموجود</h3>
+  <ol>
+    <li>احتفظ بـ <span class="ltr">CharacterController</span> و<span class="ltr">ThirdPersonController</span> و<span class="ltr">PlayerInput</span> ومتحكم الكاميرا و<span class="ltr">AudioListener</span> الحاليين.</li>
+    <li>لا تضف لاعبًا ثانيًا أو متحكم حركة آخر. اجعل Tag اللاعب <span class="ltr">Player</span> إذا كانت تكاملات Devion تتطلبه.</li>
+    <li>ضع مدير المخزون في كائن إدارة موجود أو مستقل، وأضف نسخة واحدة فقط من Devion <span class="ltr">InventoryManager</span>.</li>
+  </ol>
+  <h3>ربط المخزون</h3>
+  <ol>
+    <li>عيّن <span class="ltr">RED EDEN Core Inventory Database.asset</span> كقاعدة رئيسية لـ <span class="ltr">InventoryManager</span>.</li>
+    <li>أضف <span class="ltr">RED EDEN Item Database.asset</span> إلى قواعد العناصر الفرعية. أبقِ قواعد اللعبة الأخرى عند الحاجة، وتجنب تكرار قواعد RED EDEN.</li>
+    <li>استخدم واجهة المخزون من تثبيت Devion المرخص. أضف <span class="ltr">EventSystem</span> فقط إذا لم يكن موجودًا وكان UI يحتاجه.</li>
+  </ol>
+  <h3>التفاعل</h3>
+  <p>استخدم مكونات المحطات والعقد الموجودة وطبقة التفاعل التي يوفرها Devion؛ لا تنشئ إطار تفاعل منافسًا. يظل <span class="ltr">E</span> لمكونات RED EDEN التي تستخدم إعداد التفاعل الحالي. افحص Tag اللاعب، وCollider/Trigger، والطبقات، وActive Input Handling إذا لم يظهر التفاعل أو المطالبة.</p>
+  <div class="note">لا تفترض أن كل مشروع يملك مكونات الواجهة أو أحداث التفاعل نفسها. اربط العناصر من Inspector بعد التأكد من الحقول الفعلية التي يعرضها إصدار Devion المرخص لديك.</div>
+</section>
+<section class="page">
+  <h2>٣. التصنيع والموارد والصومعة</h2>
+  <h3>التصنيع</h3>
+  <ol>
+    <li>أضف Prefab محطة التصنيع أو مكون <span class="ltr">RedEdenCraftingStation</span> الموجود.</li>
+    <li>عيّن قاعدة <span class="ltr">RED EDEN Crafting Database.asset</span> وتحقق من الوصفات ومراجع العناصر.</li>
+    <li>اختبر وصفة بمواد كافية وأخرى غير متاحة. يجب أن تظهر الوصفة غير المتاحة معطلة، وأن تُخصم الموارد عند بدء التصنيع فقط.</li>
+    <li>اختبر امتلاء المخزون؛ يجب ألا يختفي الناتج، ويجب أن تبقى حالة كل محطة مستقلة.</li>
+  </ol>
+  <h3>عقد الموارد</h3>
+  <p>أضف Prefab العقدة المناسبة من مجلد <span class="ltr">ResourceNodes</span>، وتحقق من تعريف المورد والكمية المتبقية ومراجع نموذج/خامات العقدة. اجمع موردًا، ثم أعد تشغيل المشهد للتحقق من السلوك والحفظ المطبق في المشروع.</p>
+  <h3>الصومعة الزراعية</h3>
+  <ol>
+    <li>استخدم Prefab الإنتاج <span class="ltr">Hydroponic Farm M01 - Agricultural Silo.prefab</span>؛ لا تنشئ بديلًا من مجسم مؤقت.</li>
+    <li>تحقق من وجود <span class="ltr">Hydroponic_Farm_M01.fbx</span> والخامات والمواد ومراجع عناصر المحاصيل/الأكسجين في المشروع.</li>
+    <li>افحص مكون <span class="ltr">HydroponicFarm</span> وإعدادات الإنتاج والمخزون ومراجع قاعدة البيانات قبل وضع النسخة في المشهد.</li>
+    <li>شغّل دورة إنتاج كاملة، ثم اجمع الناتج واختبر امتلاء المخزون. لا تعدّل مراجع الـ Prefab الأصلية أثناء الاختبار.</li>
+  </ol>
+  <div class="note warning">إذا ظهر Missing Script أو Model، تحقق من اكتمال الاستيراد ومن تثبيت Devion المرخص قبل إعادة بناء الـ Prefab أو حذف أي ملفات.</div>
+</section>
+<section class="page">
+  <h2>٤. إعداد ARES Gemini Live (اختياري)</h2>
+  <ol>
+    <li>أضف مكونات ARES على كائن اللاعب الموجود أو كائن مستقل، واربط المراجع المطلوبة في Inspector. لا تضف حركة أو كاميرا جديدة.</li>
+    <li>عيّن أصل إعداد Gemini Live إلى عنوان Backend: <span class="ltr">https://red-eden.onrender.com</span>. لا تضف مفتاح API أو Token إلى Unity أو المشروع.</li>
+    <li>اربط <span class="ltr">ARESMicrophoneVoiceInput</span> كمصدر صوت متدفق؛ الإدخال PCM أحادي 16 kHz. اربط <span class="ltr">ARESAudioPlayer</span> وAudioSource؛ خرج الرد 24 kHz.</li>
+    <li>عيّن اللغة في <span class="ltr">ARESSystemConfiguration</span> إلى <span class="ltr">Arabic</span> أو <span class="ltr">English</span>، أو مررها عبر <span class="ltr">IARESGameSettingsProvider</span>. اضغط باستمرار <strong>V</strong> للتحدث وفق ربط الإدخال الحالي، ثم اترك المفتاح لإنهاء الإرسال.</li>
+    <li>امنح إذن الميكروفون عند طلبه. الصوت يرسل إلى Backend ثم إلى Google Gemini Live؛ احصل على الموافقات المطلوبة قبل الاستخدام.</li>
+  </ol>
+  <div class="note warning">نجاح <span class="ltr">/health</span> لا يثبت أن WebSocket أو جلسة Gemini Live تعمل. الخدمة العامة قد تحتاج إعادة نشر؛ لا تعتبر الصوت الحي ناجحًا قبل اختبار WebSocket موثق بمفتاح صالح ومن دون كشف الأسرار.</div>
+  <h3>الخصوصية والأمان</h3>
+  <p>مفتاح Gemini ومفتاح توقيع الجلسة يبقيان على الخادم فقط. لا تسجل المفاتيح أو رموز الجلسات أو الصوت الخام. واجهة ARES تقرأ ملخصات الحالة المسموح بها ولا ينبغي أن تمنح المساعد صلاحية تعديل المخزون أو حالة اللعب.</p>
+</section>
+<section class="page">
+  <h2>٥. اختبار التركيب واستكشاف الأخطاء</h2>
+  <ol>
+    <li>شغّل المشهد وتأكد أن الحركة والكاميرا تعملان كما قبل تركيب RED EDEN.</li>
+    <li>تحقق من وجود مدير مخزون واحد، ووجود قواعد البيانات الأساسية والفرعية الصحيحة.</li>
+    <li>اختبر التفاعل، إضافة/جمع عنصر، وصفة متاحة وغير متاحة، امتلاء المخزون، ومحطة ثانية مستقلة.</li>
+    <li>تحقق من Prefab الصومعة وموديل FBX والخامات، ثم اختبر الإنتاج والجمع.</li>
+    <li>شغّل اختبارات EditMode المتاحة. اختبر ARES منفصلًا عن أنظمة اللعب الأساسية.</li>
+  </ol>
+  <table>
+    <thead><tr><th>المشكلة</th><th>الفحص الأول</th></tr></thead>
+    <tbody>
+      <tr><td>أخطاء أنواع Devion أو Missing Assembly</td><td>ثبّت وحدات Inventory, Stat, Triggers, Utilities, UI Widgets المرخصة والمتوافقة.</td></tr>
+      <tr><td>قاعدة أو عنصر مفقود</td><td>افحص ملفات .meta والـ GUID والقاعدة الرئيسية والفرعية ومراجع الوصفات.</td></tr>
+      <tr><td>التفاعل لا يعمل</td><td>تحقق من Tag اللاعب، وCollider/Trigger، والطبقات، وInput System.</td></tr>
+      <tr><td>Prefab الصومعة مكسور</td><td>أعد استيراد ملفات الموديل والمواد كاملة؛ لا تستبدل الـ Prefab بنموذج مؤقت.</td></tr>
+      <tr><td>ARES لا يتصل</td><td>تحقق من Backend URL، إعداد الخادم، صلاحية الجلسة والاتصال الشبكي؛ لا تضع المفاتيح في Unity.</td></tr>
+      <tr><td>لا يوجد صوت</td><td>تحقق من إذن الميكروفون، وAudioSource، ومعدل PCM 16/24 kHz، ودعم WebSocket للمنصة.</td></tr>
+    </tbody>
+  </table>
+  <p class="small">تم الحفاظ على دليل التركيب نصيًا دون لقطات شاشة غير متحققة. راجع README وDEPENDENCIES وINSTALLATION-CHECKLIST في المستودع لحالة الإصدار الحالية.</p>
+</section>
+</body>
+</html>

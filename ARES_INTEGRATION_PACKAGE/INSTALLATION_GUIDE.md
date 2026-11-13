@@ -1,114 +1,97 @@
-# ARES Gemini Live installation guide
+# RED EDEN Full-System installation
 
-ARES provides native, full-duplex Gemini Live voice. It streams PCM over an authenticated WebSocket; it does not use HTTP text generation as a voice substitute. The Gemini API key stays in the backend.
+The recommended delivery is the single Unity package `../packages/RedEden-Full-System.unitypackage`. It contains project-owned RED EDEN gameplay assets, prepared databases and prefabs, and the Gemini Live ARES runtime. It does not contain a player, original game scene, Unity Starter Assets, or Devion third-party source.
 
 ## 1. Prerequisites
 
-- Unity Input System is installed and enabled under **Edit > Project Settings > Player > Active Input Handling**.
-- The target project includes the RED EDEN Crafting and Devion Inventory System assemblies used by ARES.
-- Add `com.whisper.unity` in **Window > Package Manager > + > Add package from git URL**:
+- Unity `6000.3.16f1` (or a compatible Unity 6 editor).
+- Unity Input System `1.19.0`.
+- A licensed Devion installation, including Inventory System, Stat System, Triggers, Utilities, and UI Widgets. Install these from the account that owns the license before importing this package.
+- The target project's existing Unity Starter Assets — Third Person Controller, if used. The package does not replace movement, camera, or character input.
+- For ARES: a backend deployment configured with the Gemini Live relay and a Gemini Developer API key with access to `gemini-3.8-live`.
 
-  ```text
-  https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
-  ```
+The package intentionally does not distribute Devion code, examples, UI, or binaries. See [Unity dependencies](./Unity/DEPENDENCIES.md) and [third-party notices](../LICENSE-AND-THIRD-PARTY-NOTICES.md).
 
-- A Google Gemini Developer API key with Live API access to `gemini-3.8-live`. Documentation lists the model as stable, but each Google project must be checked with its own API key.
-- A desktop or mobile Unity target that supports `System.Net.WebSockets.ClientWebSocket`. This implementation does not support WebGL.
+## 2. Import the Unity package
 
-## 2. Copy the Unity files
+1. Back up the target project and confirm its Devion assemblies are installed.
+2. Merge the dependencies from `Unity/manifest-dependencies.json` into the existing `Packages/manifest.json`; do not replace the target manifest. Ensure the Input System and Universal Render Pipeline versions are compatible with the target Unity editor.
+3. In Unity, select **Assets > Import Package > Custom Package...** and choose `RedEden-Full-System.unitypackage`.
+4. Import the listed files and wait for compilation to finish. Resolve any missing Devion assembly references from the licensed installation; do not install Whisper, Ollama, or local language models for ARES.
+5. Review the Unity Console before placing assets in a scene.
 
-1. Back up `Assets/RED EDEN/ARES` if it already exists.
-2. Copy the `Unity/Assets/RED EDEN/ARES` folder and its adjacent `Unity/Assets/RED EDEN/ARES.meta` file into the project's `Assets/RED EDEN/` folder. Preserve the folder structure and every nested `.meta` file. Do not copy only the `.cs` files.
-3. Wait for Unity to finish importing and compiling. Resolve missing package/assembly references before continuing.
-4. On the scene's existing ARES controller object, add/assign:
-   - `ARESController`: assign the `ARESGeminiLiveClient`, game settings/vitals providers as applicable, and `ARESMicrophoneVoiceInput` as the voice input provider.
-   - `ARESGeminiLiveClient`: assign an `ARES Gemini Live Configuration` asset.
-   - `ARESMicrophoneVoiceInput`: use the existing component; it now streams microphone PCM for Live and retains offline capture for the local path.
-   - `ARESAudioPlayer`: add it to the same object as `ARESGeminiLiveClient` or another active object; assign it to the client's **Audio Output Provider** field.
-   - `ARESFunctionCallHandler`: add it to the client object and assign it to **Function Call Handler**. It only returns read-only summaries.
-   - `ARESInterfaceController`: add it to an active object and assign the Live client to display connection/listening/speaking/error status.
-5. In **Create > RED EDEN > ARES > Gemini Live Configuration**, set **Backend Base Url** to `http://localhost:8000` for local testing, or the Render service origin (for example `https://ares-gemini-live.onrender.com`). Use HTTPS for every non-loopback host.
-6. On the controller, assign the Live client and microphone provider. The Live path uses **hold V to speak** and release to end the activity. Press V while ARES speaks to interrupt. The old text test panel is disabled when Live is configured.
-7. Keep existing local Ollama/offline components assigned if they are used when Gemini Live is not configured. Live speech does not require the offline Whisper recognizer to be ready.
+The package contains the ready-to-use `Hydroponic_Farm_M01.fbx`, agricultural-silo prefab, resource-node prefabs, inventory/crafting databases, and project-owned scripts. It does not include the source test scene or a player prefab.
 
-The four Live tools read current vitals, inventory, crafting, and mission status. Mission data is explicitly unavailable until a mission provider is exposed. Existing `ARESVitalsMonitor` and local alerts remain in place; no additional monitor or alert framework is required.
+## 3. Wire gameplay to the existing player
 
-## 3. Run the backend locally (Windows PowerShell)
+1. Keep the existing Unity Starter Assets Third Person Controller and camera. Do not add a second movement controller.
+2. Add exactly one Devion `InventoryManager` to the scene. Assign `RED EDEN Core Inventory Database.asset` as its main database and `RED EDEN Item Database.asset` as a child database. Add any other licensed game databases without duplicating entries.
+3. Add Devion's inventory UI and a single `EventSystem` from the licensed installation if the scene does not already have them.
+4. Keep the player tag `Player`, enable the Input System, and verify that the existing character input still moves and controls the camera.
+5. Place the supplied agricultural silo and resource-node prefabs where needed. Keep their prefab references intact; do not rebuild them from the FBX.
+6. Follow the crafting README and database assets to connect the existing inventory and interactable systems.
+
+## 4. Configure ARES in Unity
+
+The Full-System package includes ARES scripts and default resource configuration, but no scene or player setup. On one ARES GameObject:
+
+- Add `ARESController`, assign the `ARESSystemConfiguration`, the `ARESGeminiLiveClient`, and `ARESMicrophoneVoiceInput` as its streaming microphone provider. Assign a game-settings provider only if the project implements `IARESGameSettingsProvider`.
+- Add `ARESGeminiLiveClient`, assign the `ARESGeminiLiveConfiguration` asset, an `ARESAudioPlayer` as its audio output provider, and an `ARESFunctionCallHandler`.
+- Add `ARESAudioPlayer` with an `AudioSource`; keep the output sample rate at 24 kHz.
+- Add `ARESMicrophoneVoiceInput`; it streams 16 kHz PCM and does not initialize an offline recognizer.
+- Add `ARESInterfaceController` if connection/listening/speaking status should be shown.
+- Optionally add `ARESRAGHandler` and the supplied Mars knowledge assets for local archive context. This is data retrieval only; it does not start a local model.
+
+Set `Backend Base Url` in the Gemini Live configuration asset to the deployed service origin only (for example `https://your-service.onrender.com`). Do not include an API path, query string, or credential. Set the response language in `ARESSystemConfiguration` to `Arabic` or `English`, or provide it through `IARESGameSettingsProvider`. Hold **V** to speak and release it to end the activity. The game bridge exposes read-only player, inventory, crafting, and mission summaries.
+
+The Unity runtime contains no Gemini API key. Do not put backend secrets in a ScriptableObject, Unity scene, build, or source-control file.
+
+## 5. Run the backend locally on Windows
 
 Open PowerShell in `ARES_INTEGRATION_PACKAGE\Backend`:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+python -m pip install -r requirements-test.txt
 Copy-Item .env.example .env
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Open `.env` in a local editor and set:
-
-```dotenv
-GEMINI_API_KEY=your_real_gemini_api_key
-ARES_SESSION_SIGNING_KEY=paste_the_random_value_generated_above
-ARES_RATE_LIMIT_STORAGE_URI=memory://
-```
-
-Keep both secrets in the backend environment only. `.env` is ignored by Git. Run the development service on loopback:
+Set the generated random value as `ARES_SESSION_SIGNING_KEY` and a valid Google Gemini Developer API key as `GEMINI_API_KEY` in the local `.env`. Keep `.env` out of Git. Start the server on loopback:
 
 ```powershell
 python -m uvicorn Source.ares_gemini_server:app --host 127.0.0.1 --port 8000 --ws-max-size 16384
 ```
 
-Check `http://127.0.0.1:8000/health`, then run the Unity scene. For backend tests, install test-only requirements and run:
+Check `http://127.0.0.1:8000/health`, then set the Unity backend URL to `http://localhost:8000`. Health only confirms that the process is running; a successful Gemini Live session also requires a valid key and model access.
+
+Run backend tests from the `Backend` directory:
 
 ```powershell
-python -m pip install -r requirements-test.txt
-python -m compileall -q Source Tests
-python -m unittest discover -s Tests -v
+python -m compileall -q Source tests
+python -m unittest discover -s tests -v
 ```
 
-The Unity live endpoint is `/api/ares/live`. It receives a bearer token in the WebSocket handshake. Unity streams 16 kHz, mono, signed PCM16 little-endian binary audio frames, plus small JSON activity/tool messages. The backend forwards Gemini's 24 kHz PCM output as binary frames and transcription/status/tool events as JSON. No audio is stored by this service.
+## 6. Deploy the relay to Render
 
-## 4. Deploy a Render Free test service
+1. In Render, create or update a Blueprint from the GitHub repository, selecting `ARES_INTEGRATION_PACKAGE/render.yaml`.
+2. Confirm the service root is `ARES_INTEGRATION_PACKAGE/Backend`, its start command runs one Uvicorn worker, and the health check is `/health`.
+3. Add `GEMINI_API_KEY` through Render's secret environment-variable UI. Keep the generated `ARES_SESSION_SIGNING_KEY`; do not add either secret to GitHub or the Unity project.
+4. Deploy and wait for a successful build. Copy the service's HTTPS origin into the Unity configuration.
+5. Verify the deployed source is the Live relay: `/api/ares/session` issues a temporary session and `/api/ares/live` accepts an authenticated WebSocket. The OpenAPI document lists HTTP routes only, so it will not enumerate the WebSocket route. A health response alone does not prove Live works.
 
-1. Push the package branch to a Git provider connected to Render.
-2. In Render, choose **New > Blueprint** and select the repository. During Blueprint setup, set the Blueprint file path to `ARES_INTEGRATION_PACKAGE/render.yaml`.
-3. Review the service: `render.yaml` selects a single-instance Free web service with the backend directory as its root, a `/health` check, and the required WebSocket message-size limit.
-4. Set `GEMINI_API_KEY` as a secret environment variable in Render. It must be a Google Gemini Developer API key for a project with access to `gemini-3.8-live`; ensure its API restrictions allow the Generative Language API and its application restrictions allow requests from the Render service. If using IP restrictions, account for the service's outbound egress. The Blueprint generates `ARES_SESSION_SIGNING_KEY`; do not replace it with a committed value.
-5. Deploy and copy the service origin (for example, `https://ares-gemini-live.onrender.com`) into the Unity Live configuration asset. Do not add a trailing path or API key.
-6. Wait for the service to finish its first deploy before opening the Unity scene.
+The existing public endpoint may still be serving an older HTTP-only build until it is redeployed and configured. Do not use it as a Gemini Live endpoint until an authenticated WebSocket session succeeds. This repository does not contain the Render dashboard credentials or a Gemini API key.
 
-Render supports inbound WebSockets and terminates TLS for public traffic. The included Free plan is for testing only: a Free web service can spin down after 15 minutes without inbound traffic, take about a minute to wake, consume up to the workspace's included monthly hours, and restart during platform maintenance/deploys. The Unity heartbeat keeps an active Live connection from going idle, but does not prevent service restarts. A disconnect ends the current conversation; reconnecting creates a new session. Use a paid service for production.
+Render Free is suitable only for testing: services can sleep or restart and interrupt a conversation. The included rate and concurrent-connection limits are process-local; use shared gateway controls, player authentication, quota enforcement, and a paid restart-aware service before a public launch.
 
-The in-memory session limiter, per-IP WebSocket attempt limiter, and concurrent-session counter are process-local. Run one worker for this configuration. Multiple workers/instances require a shared gateway or equivalent distributed rate/concurrency control; `ARES_RATE_LIMIT_STORAGE_URI` configures only the HTTP session-creation limiter.
+## 7. Privacy and troubleshooting
 
-## 5. Authentication and request limits
-
-- Unity obtains a server-signed bearer session from `POST /api/ares/session`. Tokens expire in five minutes and are not permanent client secrets.
-- The session is anonymous. Anyone who can reach the public session endpoint can request a session; a modified client can also extract and replay a live token until it expires. This does **not** make the token a secure secret or prove player identity.
-- The Gemini API key is used only by the backend on the upstream TLS WebSocket, using Google's Developer API `key` query parameter. This authenticated URL is server-to-server only; Unity never receives it. Internal WebSocket protocol logging is disabled to prevent the credential-bearing URL from being logged.
-- The backend records safe upstream diagnostics in its server logs: endpoint, API version, fixed model, handshake status, close code, authentication/setup acceptance, and sanitized Google error status/message. It never returns those details to Unity or logs credentials, bearer tokens, request payloads, or the upstream query URL.
-- The service limits session creation to five requests per IP/minute; Live WebSocket handshakes to six attempts per IP/minute; concurrent Live sessions to two per IP and sixteen per process; incoming client messages to 3,600/minute; audio chunks to 3,200 bytes; and JSON control messages to 16 KiB.
-- These are baseline abuse controls, not authorization or a substitute for account identity, shared gateway limits, monitoring, and spend controls. Verify your game's platform-issued identity token before allowing broad public access or per-player billing.
-
-## 6. Production checklist
-
-- [ ] Use HTTPS/WSS outside loopback and verify certificates.
-- [ ] Store Gemini and signing keys in the host's secret manager/environment, not in this package.
-- [ ] Add platform identity verification and enforce per-player quotas before public launch.
-- [ ] Apply shared rate/concurrency limits and WebSocket timeouts at the gateway.
-- [ ] Use a paid, restart-aware deployment for production; test reconnection behavior.
-- [ ] Keep Uvicorn behind the platform/reverse proxy and set a bounded WebSocket message size.
-- [ ] Ensure user consent/privacy disclosures cover voice audio sent to Google.
-- [ ] Confirm no credential exists in Unity assets, build output, or Git-tracked files.
-
-## Troubleshooting
-
-- `503 Backend session authentication is not configured`: set `ARES_SESSION_SIGNING_KEY` to a random value of at least 32 bytes and restart.
-- `401` / WebSocket policy close: the session token is missing, invalid, or expired; reconnect to request a new one.
-- `1013` / capacity message: the per-IP/process Live limit or handshake rate limit was reached; wait and retry.
-- `Gemini Live is unavailable or not enabled for this API project`: verify the backend API key, billing/project configuration, and Live API access for that Google project. Account entitlement is not inferred from documentation alone.
-- For upstream setup failures, inspect the Render service logs for the sanitized `Gemini Live upstream` diagnostic. Confirm that `GEMINI_API_KEY` is present, valid, restricted to the Generative Language API as appropriate, and permitted for server-side Render requests. Never paste the key or a session token into chat, GitHub, source files, or a support report.
-- No microphone/audio: confirm the microphone provider implements streaming, the client has an `ARESAudioPlayer` assigned, microphone permissions are granted, and the target supports `ClientWebSocket`.
-- Unity Live does not compile: check the Unity Input System, `com.whisper.unity`, RED EDEN/Devion references, and the target's .NET API compatibility.
+- Microphone audio is streamed to the backend and then to Google Gemini Live; disclose this and obtain any required user consent. This service does not store audio.
+- ARES sessions are anonymous, HMAC-signed, and expire after five minutes. They do not prove player identity.
+- `503` when creating a session: configure `ARES_SESSION_SIGNING_KEY` in the backend environment.
+- WebSocket policy close: the session token may be missing, invalid, or expired; reconnect to request a new one.
+- Live setup failure: inspect sanitized backend diagnostics and verify `GEMINI_API_KEY` and model access. Never share keys, bearer tokens, raw audio, or transcripts in logs or support reports.
+- Missing microphone or playback: verify OS microphone permission, streaming microphone assignment, active audio output, and a target that supports `ClientWebSocket`. WebGL is not supported.
+- Unity compile errors: verify Input System and licensed Devion/Crafting assemblies. Do not add Whisper or local model downloads as a workaround.

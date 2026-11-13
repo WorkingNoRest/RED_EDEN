@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using DevionGames.InventorySystem;
+using DevionGames.UIWidgets;
 using RedEden.Crafting;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ namespace RedEden.ARES
             builder.AppendLine("INVENTORY");
             try
             {
-                ItemContainer[] containers = Resources.FindObjectsOfTypeAll<ItemContainer>();
+                ItemContainer[] containers = WidgetUtility.FindAll<ItemContainer>();
                 if (containers == null || containers.Length == 0)
                 {
                     builder.AppendLine("- Inventory manager unavailable; no item containers were detected.");

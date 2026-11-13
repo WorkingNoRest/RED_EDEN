@@ -5,7 +5,7 @@ namespace RedEden.ARES
     [CreateAssetMenu(menuName = "RED EDEN/ARES/Gemini Live Configuration", fileName = "ARES_GeminiLiveConfiguration")]
     public sealed class ARESGeminiLiveConfiguration : ScriptableObject
     {
-        [SerializeField] private string backendBaseUrl = "http://localhost:8000";
+        [SerializeField] private string backendBaseUrl = "https://red-eden.onrender.com";
         [SerializeField] private string defaultLanguage = "Arabic";
 
         public string BackendBaseUrl => backendBaseUrl;
@@ -14,7 +14,7 @@ namespace RedEden.ARES
         private void OnValidate()
         {
             if (string.IsNullOrWhiteSpace(backendBaseUrl))
-                backendBaseUrl = "http://localhost:8000";
+                backendBaseUrl = "https://red-eden.onrender.com";
             else
                 backendBaseUrl = backendBaseUrl.Trim().TrimEnd('/');
 

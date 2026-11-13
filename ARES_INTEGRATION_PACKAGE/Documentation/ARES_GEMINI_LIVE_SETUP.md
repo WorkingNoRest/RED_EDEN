@@ -10,7 +10,8 @@ ARES uses a native, full-duplex Gemini Live WebSocket session. Unity streams mic
 - Gemini audio output is forwarded as raw 16-bit PCM at 24 kHz to the Unity audio ring buffer.
 - Hold V to stream speech; release V to end the activity. Press V while ARES is speaking to interrupt and flush queued playback.
 - The backend enables only four read-only game tools: current vitals, inventory, crafting status, and exposed mission status. Mission status reports that data is unavailable until a game mission provider is integrated.
-- Local NASA archive retrieval can supplement a spoken request when its final/interim transcription is available before V is released. Missing archive records do not block Live speech.
+- The optional bundled NASA archive is local data retrieval only; it does not initialize an offline language or speech model. Gemini's Live transcription may select archive evidence, and missing records never block voice.
+- The package does not install Whisper, start Ollama, or download local models. Legacy-named compatibility components contain no provisioning, recognition, or local-generation implementation.
 
 ## Required server environment
 
@@ -32,7 +33,7 @@ There is no `GEMINI_MODEL` setting: model selection and tool definitions remain 
 
 ## Deployment and service access
 
-See the [installation guide](../INSTALLATION_GUIDE.md) for copy-and-paste Windows and Render steps. The included `render.yaml` can be selected as the Blueprint file during Render setup. It defines a Free service for testing; Render Free web services can sleep after 15 minutes without inbound traffic, take about a minute to start, and may restart. A Live WebSocket is not guaranteed to survive deploys or platform restarts. Use a paid service and gateway-backed rate/concurrency controls for production.
+See the [installation guide](../INSTALLATION_GUIDE.md) for copy-and-paste Windows and Render steps. The included `render.yaml` can be selected as the Blueprint file during Render setup. It defines a Free service for testing; Render Free web services can sleep after 15 minutes without inbound traffic, take about a minute to start, and may restart. A Live WebSocket is not guaranteed to survive deploys or platform restarts. The currently referenced public endpoint must be redeployed with this Live relay and configured with server-side secrets before it is considered usable. Use a paid service and gateway-backed rate/concurrency controls for production.
 
 ## Authentication boundaries
 

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>RED EDEN — Unity Installation Guide</title>
+<style>
+@page { size: A4; margin: 15mm 16mm; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #17212b; font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; }
+h1, h2, h3 { color: #123047; line-height: 1.25; }
+h1 { font-size: 24pt; margin: 0 0 8mm; }
+h2 { font-size: 16pt; margin: 0 0 4mm; border-bottom: 2px solid #ca7a32; padding-bottom: 2mm; }
+h3 { font-size: 12pt; margin: 4mm 0 1.5mm; }
+p { margin: 0 0 2.5mm; }
+ul, ol { margin: 1mm 0 3mm; padding-left: 7mm; }
+li { margin: .8mm 0; }
+code, .ltr { direction: ltr; unicode-bidi: isolate; font-family: Consolas, monospace; }
+.page { page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.cover { min-height: 255mm; display: flex; flex-direction: column; justify-content: center; }
+.eyebrow { color: #bd6926; font-weight: 700; font-size: 13pt; }
+.subtitle { font-size: 14pt; color: #405565; }
+.note { border-left: 4px solid #ca7a32; background: #f3f6f7; padding: 3mm 4mm; margin: 3mm 0; }
+.warning { border-left-color: #b64236; background: #fff3f1; }
+.small { font-size: 9pt; color: #44535e; }
+table { border-collapse: collapse; width: 100%; margin: 3mm 0; }
+th, td { border: 1px solid #b9c5cc; padding: 2mm; text-align: left; vertical-align: top; }
+th { background: #eaf0f3; }
+</style>
+</head>
+<body>
+<section class="page cover">
+  <p class="eyebrow">RED EDEN · INSTALLATION GUIDE</p>
+  <h1>Integrating RED EDEN with Unity Third Person</h1>
+  <p class="subtitle">Inventory, interaction, crafting, resources, agricultural silo, and ARES Gemini Live</p>
+  <div class="note"><strong>Goal:</strong> Import RED EDEN systems into another Unity project and connect them around its existing player without replacing movement or camera systems.</div>
+  <p>Reference editor: <span class="ltr">Unity 6000.3.16f1</span></p>
+  <p>Package: <span class="ltr">packages/RedEden-Full-System.unitypackage</span></p>
+  <p class="small">This guide does not claim Gemini Live connectivity; check the repository's release and test status before use.</p>
+</section>
+<section class="page">
+  <h2>1. Requirements and import</h2>
+  <ul>
+    <li>Unity 6 compatible with the source project, and Unity Input System 1.19.0 or a compatible later version.</li>
+    <li>A licensed Devion installation: Inventory System, Stat System, Triggers, Utilities, and UI Widgets. Install them from the licensed account. RED EDEN does not include Devion source, UI, or samples.</li>
+    <li>Keep the target project's Unity Starter Assets — Third Person Controller. ARES is optional and needs the Gemini Live backend.</li>
+  </ul>
+  <ol>
+    <li>Back up the target project and install required licensed dependencies first.</li>
+    <li>Merge the Input System and URP dependencies from <span class="ltr">ARES_INTEGRATION_PACKAGE/Unity/manifest-dependencies.json</span> into the existing <span class="ltr">Packages/manifest.json</span>; do not replace the manifest.</li>
+    <li>In Unity, choose <span class="ltr">Assets &gt; Import Package &gt; Custom Package...</span>, select <span class="ltr">RedEden-Full-System.unitypackage</span>, and import its contents.</li>
+    <li>Wait for compilation and check the Console. Devion assembly errors usually mean that the licensed modules are missing or incompatible; do not import duplicate Devion files.</li>
+  </ol>
+  <div class="note warning">The package does not import the test scene or a mandatory player and does not replace movement or camera systems. Do not combine a full-package import with manual folder copying in the same project.</div>
+  <h3>Verify databases</h3>
+  <p>Confirm that <span class="ltr">RED EDEN Core Inventory Database.asset</span>, <span class="ltr">RED EDEN Item Database.asset</span>, and <span class="ltr">RED EDEN Crafting Database.asset</span> exist. Open them in the Project window and check that their data appears without missing references. Preserve all <span class="ltr">.meta</span> files and do not move assets after import.</p>
+</section>
+<section class="page">
+  <h2>2. Existing player, inventory, and interaction</h2>
+  <h3>Preserve the current player</h3>
+  <ol>
+    <li>Keep the existing <span class="ltr">CharacterController</span>, <span class="ltr">ThirdPersonController</span>, <span class="ltr">PlayerInput</span>, camera controller, and <span class="ltr">AudioListener</span>.</li>
+    <li>Do not add another player or movement controller. Set the player Tag to <span class="ltr">Player</span> when required by the Devion integration.</li>
+    <li>Keep one Devion <span class="ltr">InventoryManager</span> in an existing or dedicated manager object; do not duplicate it.</li>
+  </ol>
+  <h3>Connect inventory</h3>
+  <ol>
+    <li>Assign <span class="ltr">RED EDEN Core Inventory Database.asset</span> as the InventoryManager main database.</li>
+    <li>Add <span class="ltr">RED EDEN Item Database.asset</span> as a child item database. Keep other game databases as needed and avoid duplicate RED EDEN entries.</li>
+    <li>Use the inventory UI from your licensed Devion installation. Add an <span class="ltr">EventSystem</span> only if the scene does not already have one and the UI requires it.</li>
+  </ol>
+  <h3>Interaction</h3>
+  <p>Use the existing station and node components with the Devion interaction layer; do not build a competing interaction framework. Existing RED EDEN components use <span class="ltr">E</span> where configured. If interaction or prompts fail, inspect player Tag, Collider/Trigger setup, physics layers, and Active Input Handling.</p>
+  <div class="note">Do not assume every project has identical UI or interaction components. Connect items through the Inspector using fields actually present in your licensed Devion version.</div>
+</section>
+<section class="page">
+  <h2>3. Crafting, resources, and silo</h2>
+  <h3>Crafting</h3>
+  <ol>
+    <li>Place a crafting-station prefab or the existing <span class="ltr">RedEdenCraftingStation</span> component.</li>
+    <li>Assign <span class="ltr">RED EDEN Crafting Database.asset</span> and verify recipe/item references.</li>
+    <li>Test an available and unavailable recipe. Unavailable recipes should be visibly disabled, and ingredients should be deducted only when crafting starts.</li>
+    <li>Test a full inventory; finished output must remain available, and each station must retain its own state.</li>
+  </ol>
+  <h3>Resource nodes</h3>
+  <p>Place the appropriate prefab from <span class="ltr">ResourceNodes</span>, then verify its resource definition, remaining quantity, and model/material references. Collect a resource and reload the scene to check the project's persistence behavior.</p>
+  <h3>Agricultural silo</h3>
+  <ol>
+    <li>Use the production prefab <span class="ltr">Hydroponic Farm M01 - Agricultural Silo.prefab</span>; do not replace it with a temporary model.</li>
+    <li>Verify <span class="ltr">Hydroponic_Farm_M01.fbx</span>, its materials, and crop/oxygen database references are present.</li>
+    <li>Inspect the <span class="ltr">HydroponicFarm</span> component, production settings, inventory, and database references before placing it in the scene.</li>
+    <li>Run a complete production cycle, then collect the output and test a full inventory. Avoid editing the source prefab during testing.</li>
+  </ol>
+  <div class="note warning">If the model or script is missing, verify that import completed and licensed Devion dependencies are installed before rebuilding the prefab or deleting files.</div>
+</section>
+<section class="page">
+  <h2>4. ARES Gemini Live setup (optional)</h2>
+  <ol>
+    <li>Add ARES components to the existing player or a separate object and assign their Inspector references. Do not add a new movement or camera system.</li>
+    <li>Set the Gemini Live configuration Backend URL to <span class="ltr">https://red-eden.onrender.com</span>. Never place an API key or token in Unity or the project.</li>
+    <li>Assign <span class="ltr">ARESMicrophoneVoiceInput</span> as the streaming microphone provider; input is mono 16 kHz PCM. Assign <span class="ltr">ARESAudioPlayer</span> and an AudioSource; response output is 24 kHz PCM.</li>
+    <li>Set the language in <span class="ltr">ARESSystemConfiguration</span> to <span class="ltr">Arabic</span> or <span class="ltr">English</span>, or provide it through <span class="ltr">IARESGameSettingsProvider</span>. Hold <strong>V</strong> to speak and release it to end transmission, according to the current input binding.</li>
+    <li>Grant microphone permission when requested. Audio is sent to the backend and then Google Gemini Live; obtain any required user consent.</li>
+  </ol>
+  <div class="note warning">A successful <span class="ltr">/health</span> response does not prove that WebSocket or Gemini Live sessions work. The public service may need redeployment; do not claim live voice works until an authenticated WebSocket session is verified without exposing secrets.</div>
+  <h3>Privacy and security</h3>
+  <p>Keep the Gemini API key and session-signing key on the server only. Never log keys, session tokens, or raw audio. ARES should only read supported game-state summaries and must not be granted authority to change inventory or gameplay state.</p>
+</section>
+<section class="page">
+  <h2>5. Integration checks and troubleshooting</h2>
+  <ol>
+    <li>Run the scene and confirm movement and camera behavior are unchanged.</li>
+    <li>Verify there is one inventory manager and the correct main/child databases.</li>
+    <li>Test interaction, item pickup, available/unavailable recipes, a full inventory, and two independent stations.</li>
+    <li>Verify the silo prefab, FBX, and materials, then test production and collection.</li>
+    <li>Run available EditMode tests. Test ARES separately from core gameplay systems.</li>
+  </ol>
+  <table>
+    <thead><tr><th>Problem</th><th>First check</th></tr></thead>
+    <tbody>
+      <tr><td>Devion type or missing-assembly errors</td><td>Install compatible licensed Inventory, Stat, Triggers, Utilities, and UI Widgets modules.</td></tr>
+      <tr><td>Missing database or item</td><td>Check .meta/GUID files, main/child database assignments, and recipe references.</td></tr>
+      <tr><td>Interaction does not work</td><td>Check player Tag, Collider/Trigger, physics layers, and Input System.</td></tr>
+      <tr><td>Silo prefab is broken</td><td>Reimport the complete model/material assets; do not replace the prefab with a placeholder.</td></tr>
+      <tr><td>ARES cannot connect</td><td>Check backend URL, server configuration, session validity, and network access; never put secrets in Unity.</td></tr>
+      <tr><td>No audio</td><td>Check microphone permission, AudioSource, 16/24 kHz PCM rates, and platform WebSocket support.</td></tr>
+    </tbody>
+  </table>
+  <p class="small">This guide is text-only; it does not contain unverified screenshots. See the repository README, DEPENDENCIES, and INSTALLATION-CHECKLIST for current release status.</p>
+</section>
+</body>
+</html>

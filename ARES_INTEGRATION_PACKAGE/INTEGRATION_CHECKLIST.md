@@ -1,16 +1,22 @@
-# Integration checklist
+# Release and integration checklist
 
-- [ ] Install Unity Input System, `com.whisper.unity`, RED EDEN Crafting, and Devion Inventory dependencies.
-- [ ] Copy all of `Unity/Assets/RED EDEN/ARES/`, preserving every `.meta` file.
-- [ ] Assign `ARESController`, `ARESGeminiLiveClient`, streaming `ARESMicrophoneVoiceInput`, `ARESAudioPlayer`, `ARESFunctionCallHandler`, and `ARESInterfaceController`.
-- [ ] Set the ARES backend base URL to loopback for local testing or HTTPS for a remote service.
-- [ ] Set backend-only `GEMINI_API_KEY` and a generated `ARES_SESSION_SIGNING_KEY` in the host environment.
-- [ ] Keep the model fixed to `gemini-3.8-live`; do not add a key/model override to Unity.
-- [ ] Start the backend behind HTTPS/WSS for remote use and verify `GET /health`.
-- [ ] Verify missing, tampered, and expired bearer tokens are rejected before WebSocket accept.
-- [ ] Verify malformed/oversized frames, function-call allowlist, concurrency limits, and rate limits.
-- [ ] Run the Python compile check and backend test suite from the installation guide.
-- [ ] Run Unity EditMode PCM conversion tests and test press/hold/release, playback interruption, microphone permissions, and reconnect in the Editor/player.
-- [ ] Configure shared gateway rate/concurrency limits and game identity verification before public launch.
-- [ ] Scan Unity assets, build output, and Git-tracked files for credentials.
-- [ ] Confirm the local Ollama/offline path and local vitals alerts still work when Gemini Live is not configured.
+## Unity package
+
+- [ ] Install the required Devion assets from the account that owns their license.
+- [ ] Merge `Unity/manifest-dependencies.json` into the target project's existing package manifest.
+- [ ] Import `packages/RedEden-Full-System.unitypackage`; do not import the superseded Core/ARES packages alongside it.
+- [ ] Confirm the FBX, agricultural silo prefab, resource-node prefabs, and all three RED EDEN databases are present.
+- [ ] Confirm no test/original game scene, player, Devion source, local inference implementation, or model configuration was exported.
+- [ ] Keep Unity Starter Assets Third Person movement and camera; configure one InventoryManager and its licensed UI.
+- [ ] Configure the ARES client, streaming microphone, audio output, function-call handler, and HTTPS backend origin.
+- [ ] Run Unity compilation, PCM EditMode tests, and an import check in a clean project.
+
+## Backend
+
+- [ ] Run `python -m compileall -q Source tests`.
+- [ ] Run `python -m unittest discover -s tests -v`.
+- [ ] Keep Gemini and session-signing secrets only in local ignored `.env` or the host secret manager.
+- [ ] Deploy `ARES_INTEGRATION_PACKAGE/render.yaml` and verify `/health`, session issuance, and an authenticated `/api/ares/live` WebSocket.
+- [ ] Do not treat HTTP OpenAPI output or a healthy process as proof of a working Gemini Live session.
+- [ ] Confirm actual Gemini account access, Arabic voice quality, microphone permissions, and output playback with an authorized key/device.
+- [ ] Add player identity, spend controls, and shared gateway limits before public launch.

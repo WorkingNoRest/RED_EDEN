@@ -48,8 +48,6 @@ namespace RedEden.ARES
         private void Awake()
         {
             recognizer = recognizerProvider as IARESSpeechRecognizer;
-            if (recognizer == null)
-                Debug.LogError("ARES voice input needs a component implementing IARESSpeechRecognizer.", this);
         }
 
         private void OnDisable()
@@ -138,7 +136,7 @@ namespace RedEden.ARES
             }
             if (recognizer == null)
             {
-                onError?.Invoke("ARES speech recognizer is not assigned.");
+                onError?.Invoke("Offline transcription is not part of this package. Use Gemini Live PCM streaming.");
                 return;
             }
             if (!recognizer.IsReady)

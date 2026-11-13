@@ -1,57 +1,47 @@
-# RED EDEN — أنظمة اللاعب والأصول الجاهزة
+# RED EDEN — أنظمة اللاعب الجاهزة
 
-أنظمة RED EDEN والأصول الجاهزة للمخزون والتفاعل والتصنيع والموارد والصومعة الزراعية، معدّة للتركيب على شخصية **Unity Starter Assets — Third Person Controller** مع إبقاء حركة الشخصية الأصلية كما هي.
+حزمة Unity موحّدة لأنظمة RED EDEN: المخزون والتفاعل والتصنيع والموارد والصومعة الزراعية، مع ARES المتصل بـ Gemini Live. صُممت لتُركّب على شخصية **Unity Starter Assets — Third Person Controller** دون استبدال حركة اللاعب أو الكاميرا.
 
-## محتويات المستودع
+## الحزمة الرئيسية
 
-- `Assets/RED EDEN/` — مجلد Unity كامل مع ملفات `.meta`، السكربتات، قواعد البيانات الجاهزة، عناصرها، الموارد، المشاهد، النماذج، وprefab الصومعة الزراعية.
-- `Assets/Prefabs/` — مجلد Prefabs كامل مع موديلات الموارد والمحطة وملفات المواد والخامات التابعة لها.
-- `packages/RedEden-Core.unitypackage` — الحزمة الكاملة للاستيراد مرة واحدة: مجلد Crafting وPrefabs واعتماديات Devion اللازمة، بما فيها نموذج الصومعة وprefab الجاهز.
-- `packages/RedEden-Devion-Dependencies.unitypackage` — سكربتات Devion المطلوبة فقط، لاستخدامها عند نسخ مجلدي `Assets/` يدويًا إلى مشروع لا يحتوي Devion بعد.
-- `packages/RedEden-ARES-Optional.unitypackage` — طبقة ARES الاختيارية للمساعد/المسح/الصوت والحالة.
-- `docs/RedEden-Installation-AR.pdf` — دليل التركيب العربي.
-- قواعد البيانات الجاهزة داخل `Assets/RED EDEN/Crafting/Data/`:
-  - `RED EDEN Core Inventory Database.asset` — قاعدة Devion الرئيسية وإعداداتها الافتراضية.
-  - `RED EDEN Item Database.asset` — عناصر RED EDEN الأربعة عشر، وتُضاف كقاعدة فرعية.
-  - `RED EDEN Crafting Database.asset` — تعريفات الموارد والوصفات.
+استورد [RedEden-Full-System.unitypackage](./packages/RedEden-Full-System.unitypackage) من **Assets > Import Package > Custom Package**. تشمل الحزمة الملفات والأصول المملوكة للمشروع، ومنها:
 
-## التوافق والاعتماديات
+- موديل `Hydroponic_Farm_M01.fbx` وPrefab الصومعة الزراعية الجاهز.
+- قواعد بيانات العناصر والتصنيع والمخزون، وPrefabs الموارد والمحطات.
+- سكربتات RED EDEN والتفاعل، وطبقة ARES Gemini Live وملفاتها `.meta`.
+- لا تشمل مشهد اللعبة الأصلي أو شخصية اللاعب أو ملفات Unity Starter Assets.
+- لا تتضمن كود Devion أو واجهاته أو أمثلته؛ يجب تثبيت Devion من الحساب المرخص للمشروع.
+- لا تتضمن Whisper أو Ollama أو أدوات تنزيل وتشغيل نماذج محلية.
 
-- إصدار المشروع الذي جُهّزت عليه الحزمة: Unity `6000.3.16f1`.
-- فعّل **Input System Package (New)** من `Project Settings > Player > Active Input Handling`.
-- تحتاج الأنظمة إلى Devion Inventory System وTriggers وUtilities وUI Widgets. إذا كانت موجودة مسبقًا، احتفظ بنسختك المتوافقة ولا تستورد اعتماديات Devion مرة ثانية.
-- واجهة Devion Inventory Window نفسها غير مضمنة؛ استخدم الواجهة من تثبيت Devion المرخّص لديك. هذا يتجنب سحب محتوى الأمثلة أو متحكم Devion للشخصية إلى الحزمة.
-- لا تتضمن الحزمة Devion Third Person Controller؛ الحركة والكاميرا تبقيان من Unity Starter Assets.
-- عند نسخ مجلد `Assets/RED EDEN` كاملًا، يحتوي أيضًا سكربتات ARES. إذا احتفظت بها، استخدم حزمة ARES الاختيارية واعتماد Unity `com.whisper.unity` المذكورين أدناه؛ أو استبعد مجلد `Assets/RED EDEN/ARES/` إذا لم تكن تحتاجها.
-- ARES إضافة اختيارية تعتمد على `com.whisper.unity` وخادم Ollama محلي. لا حاجة إليها لتشغيل المخزون أو التفاعل أو التصنيع.
+المصادر والبيانات الجاهزة موجودة في `Assets/RED EDEN/` و`Assets/Prefabs/`. راجع [قائمة الاعتماديات والتراخيص](./DEPENDENCIES.md) و[دليل التركيب بالعربية PDF](./docs/RedEden-Installation-Guide-AR.pdf) أو [English PDF](./docs/RedEden-Installation-Guide-EN.pdf).
 
-## التركيب
+## المتطلبات والتركيب
 
-**نسخ المجلدات الجاهزة:** نزّل المستودع بصيغة ZIP، ثم انسخ `Assets/RED EDEN/` و`Assets/Prefabs/` إلى مجلد `Assets/` في مشروع Unity، مع الحفاظ على بنية المجلدات وجميع ملفات `.meta`. لا تضع المجلدين تحت `Assets/Assets/`. إذا كانت هذه المسارات موجودة في المشروع، خذ نسخة احتياطية وقارن المحتوى قبل الدمج كي لا تستبدل أصولًا محلية.
+- Unity `6000.3.16f1` أو إصدار Unity 6 متوافق.
+- Unity Input System `1.19.0` وURP `17.3.0` أو إصدارات متوافقة.
+- وحدات Devion المرخصة: Inventory System وStat System وTriggers وUtilities وUI Widgets، مثبتة مسبقًا في المشروع الهدف؛ رقم إصدار Devion غير موجود في بيانات الملفات المصدرية.
+- دمج اعتمادي Input System وURP المحددين في `ARES_INTEGRATION_PACKAGE/Unity/manifest-dependencies.json` مع `Packages/manifest.json` الموجود؛ لا تستبدل ملف manifest كاملًا.
+- أبقِ Unity Third Person Controller والكاميرا كما هما. أضف InventoryManager واحدًا، عيّن قاعدة RED EDEN الأساسية وقاعدة العناصر التابعة، واستخدم واجهة Devion من التثبيت المرخص.
 
-إذا كانت أنظمة Devion غير مثبتة، استورد `RedEden-Devion-Dependencies.unitypackage` بعد نسخ المجلدين. لا تستورد اعتماديات Devion المكررة إذا كانت موجودة وملائمة. عند الاحتفاظ بـ ARES، أضف اعتماد `com.whisper.unity` من Package Manager (`https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity`) قبل انتظار اكتمال تجميع سكربتات ARES.
+لخطوات الإعداد التفصيلية، راجع [دليل التركيب](./ARES_INTEGRATION_PACKAGE/INSTALLATION_GUIDE.md) و[قائمة التحقق](./INSTALLATION-CHECKLIST.md).
 
-**بديل الاستيراد الكامل:** في مشروع نظيف، استورد `RedEden-Core.unitypackage` بدل نسخ مجلدي `Assets/` يدويًا؛ يحتوي الحزمة على أنظمة RED EDEN وPrefabs والاعتماديات.
+## ARES Gemini Live
 
-بعدها:
+يرسل ARES الصوت عبر WebSocket إلى جسر خلفي متصل بـ Gemini Live؛ اضغط باستمرار **V** للتحدث. صوت الميكروفون PCM أحادي 16 kHz، وصوت الرد PCM 24 kHz. مفتاح Gemini ومفتاح توقيع الجلسات يبقيان على الخادم ولا يوضعان في Unity.
 
-1. انتظر اكتمال استيراد الملفات وتجميع السكربتات، وعالج أي أخطاء في Console.
-2. أضف `InventoryManager` واحدًا إلى المشهد. اجعل `RED EDEN Core Inventory Database.asset` القاعدة الرئيسية و`RED EDEN Item Database.asset` قاعدة فرعية، وأضف قواعد العناصر الأخرى المطلوبة للعبة دون تكرار.
-3. أضف واجهة Devion Inventory من تثبيتك المرخّص و`EventSystem` إذا لم يكونا موجودين، واربطهما وفق دليل Devion.
-4. أبقِ مكونات حركة وكاميرا Unity Third Person كما هي. تحقق من Tag اللاعب `Player` ومن إعداد Input System.
-5. اسحب Prefab المحطة من `Assets/Prefabs/Machines/` وPrefab الصومعة من `Assets/RED EDEN/Crafting/Data/Prefabs/Machines/` إلى المشهد. اسحب عقد الموارد من `Assets/RED EDEN/Crafting/Data/Prefabs/ResourceNodes/` عند الحاجة؛ Prefabs خامات الموارد موجودة في `Assets/Prefabs/Ores/`.
-6. راجع دليل PDF لإعداد المكونات والاختبار. ARES اختيارية ولا تستبدل نظام الحركة.
+الكود الخلفي في `ARES_INTEGRATION_PACKAGE/Backend/`. فرع `main` يحتوي تنفيذ WebSocket الحقيقي، لكن الخدمة العامة الموجودة قديمة وتعرض حاليًا مسارات HTTP فقط. يلزم نشر نسخة `render.yaml` وضبط `GEMINI_API_KEY` في لوحة Render قبل اعتبار الاتصال الحي جاهزًا. لا تُعدّ استجابة `/health` اختبارًا لصوت Gemini.
 
-## تنبيهات معروفة
+مصادر ARES:
+- [حزمة التكامل](./ARES_INTEGRATION_PACKAGE/README.md)
+- [إعداد Gemini Live](./ARES_INTEGRATION_PACKAGE/Documentation/ARES_GEMINI_LIVE_SETUP.md)
+- [ملاحظات الأمان](./ARES_INTEGRATION_PACKAGE/Documentation/ARES_ARCHITECTURE.md)
+- [تعليمات النشر](./ARES_INTEGRATION_PACKAGE/INSTALLATION_GUIDE.md)
 
-- يتضمن المستودع نموذج `Hydroponic_Farm_M01.fbx` وPrefab الصومعة الجاهز `Hydroponic Farm M01 - Agricultural Silo.prefab` مع مراجع النموذج والعناصر. استخدم الـ prefab الجاهز؛ لا تحتاج إلى تشغيل أداة إنشاء prefab أثناء التركيب المعتاد.
-- ملفات Devion من أصول طرف ثالث. استخدمها ووزّعها فقط ضمن صلاحيات وترخيص Devion المطبّقين على مشروعك.
-- تضمّن المستودع ملفات اختبارات Unity الخاصة بالتصنيع. شغّل اختبارات `RedEden.Crafting` من Test Runner بعد الاستيراد.
+## التحقق
 
-## الحزم
+- Unity `6000.3.16f1`: استيراد الحزمة وتجميعها في مشروع تحقق نظيف مع تثبيت Devion المرخص محليًا؛ اجتازت اختبارات ARES التسعة واختبارات Crafting الستة.
+- تدقيق الحزمة: 307 مسارات أصول، تشمل الموديل والـPrefab وقواعد البيانات؛ دون مشاهد أو ملفات Devion أو Starter Assets.
+- اختبارات Python الخلفية: 27 اختبارًا ناجحًا تشمل الجلسات والاتصال والبروتوكول وحدود الرسائل والأدوات.
+- لم يُجرَ اتصال Gemini حي من دون مفتاح صالح، ولم يُتحقق من صوت جهاز حقيقي.
 
-استخدم نسخ المجلدات الجاهزة أو حزمة Core الكاملة، وليس كليهما في عملية تركيب واحدة. استورد ARES الاختيارية فقط إذا كان المشروع يحتاج المساعد أو الماسح أو إدخال الصوت؛ إعداد ARES وخدماته المحلية موضّحان في PDF.
-
-## ARES Gemini backend
-
-تتضمن [حزمة ARES_INTEGRATION_PACKAGE](./ARES_INTEGRATION_PACKAGE/README.md) سكربتات Unity وملفات `.meta` والخادم الخلفي واعتماديات Python ودليل تركيب كامل. يستخدم ARES اتصال Gemini Live حقيقيًا ثنائي الاتجاه عبر WebSocket؛ اضغط باستمرار على V للتحدث واتركه لإنهاء الدور، ويمكنك مقاطعة صوت ARES بالضغط مجددًا. يحمي الاتصال رمز جلسة bearer مجهولًا قصير العمر (خمس دقائق)؛ يبقى مفتاح Gemini ومفتاح توقيع الجلسات على الخادم فقط. الرمز المؤقت ليس سرًا آمنًا ولا تثبت الجلسة المجهولة هوية اللاعب؛ قبل الإطلاق العام، أضف تحقق مزود هوية اللعبة وحدودًا مشتركة عبر بوابة HTTPS/WSS. راجع [دليل التركيب](./ARES_INTEGRATION_PACKAGE/INSTALLATION_GUIDE.md) و[ملاحظات الأمان](./ARES_INTEGRATION_PACKAGE/Documentation/ARES_ARCHITECTURE.md).
+لا يمنح المستودع ترخيصًا لأصول الطرف الثالث. راجع [الإشعارات](./LICENSE-AND-THIRD-PARTY-NOTICES.md) قبل إعادة التوزيع.

@@ -19,4 +19,6 @@ The ARES game bridge inspects active containers and station data without mutatin
 - What is my current mission?
 - How can I obtain water?
 
-Gemini Live can call only the backend-declared read-only functions for current vitals, inventory, crafting, and mission status. `ARESFunctionCallHandler` validates each name again in Unity and returns a bounded summary; unsupported actions and mutations are not exposed. The mission function currently reports that mission data is not available. When local speech transcription and supporting NASA archive records are available, Unity sends bounded archive evidence as context before ending the Live turn.
+Gemini Live can call only the backend-declared read-only functions for current vitals, inventory, crafting, and mission status. `ARESFunctionCallHandler` validates each name again in Unity and returns a bounded summary; unsupported actions and mutations are not exposed. The mission function currently reports that mission data is not available. Gemini's input transcription can optionally select supporting NASA archive records; Unity sends only bounded archive evidence as context before ending the Live turn.
+
+ARES does not start local Ollama/Whisper services or download language models. Legacy-named scene components are inert compatibility stubs; the local-model provisioner, recognizer, and generation implementations are removed.

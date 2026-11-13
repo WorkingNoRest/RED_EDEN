@@ -1,24 +1,21 @@
-# ARES validation report
+# ARES Gemini Live Verification Report
 
-## Executed checks
+## Backend tests
 
-- Python compilation: `python -m py_compile Source\ares_gemini_server.py Tests\test_ares_gemini_server.py` — passed.
-- Backend tests: `python -m unittest discover -s Tests -v` — 15 passed, covering session signing/expiry, WebSocket authentication, protocol bounds, rate/concurrency limits, tool-call validation, audio forwarding, and upstream failures.
-- Unity source/package synchronization — all Live runtime scripts and EditMode test sources match their package copies.
-- Credential scan: no real Gemini API key, permanent bearer token, or private-key PEM marker was found in tracked files or Unity source/package assets. The only long-value pattern matches are the setup guide's explicit `your_real_...` and `paste_the_random_...` placeholders. No compiled Unity build artifacts were present under `Assets` to scan.
-- .NET/Unity build: `dotnet build` was attempted and could not run because this checkout has no Unity `ProjectSettings\ProjectVersion.txt`, package manifest, `.sln`, or `.csproj` build input (`MSB1003`). The Unity editor is installed, but the game project needed to generate those inputs is not present here.
-- Unity EditMode tests and live Gemini API calls were not run; they require a complete Unity project and an enabled Gemini Live API key, respectively.
+Verified with Python 3.14 on the repository backend:
 
-## Security properties
+- `python -m compileall -q Source tests` — passed.
+- `python -m unittest discover -s tests -v` — 27 tests passed.
 
-- Unity requests five-minute server-signed bearer sessions; the token is temporary access, not a client-side secret or proof of player identity.
-- The Gemini API key and session-signing key are backend environment values and are never sent to Unity.
-- The backend controls the model/system instruction and only exposes a fixed allowlist of read-only tools.
-- HTTP request bodies, JSON control messages, audio frames, tool responses, session duration, connection attempts, active sessions, and messages are bounded.
-- The included Render configuration uses one worker because the additional WebSocket limits are process-local.
+Coverage includes signed-session expiration/tampering, live WebSocket setup and relay protocol, UTF-8/binary frame validation, audio bounds, read-only function-call allowlisting, rate/concurrency limits, error sanitization, and cleanup paths.
 
-## Deployment and runtime limitations
+## Unity and hosted service status
 
-- Anonymous sessions do not authenticate players. Production deployments should verify platform identity and enforce per-player quotas and shared gateway limits.
-- No live Gemini call, account entitlement, Arabic speech quality, Unity Play Mode behavior, or Unity-generated build was verified in this checkout.
-- The Render Free plan is for testing only; sleeps/restarts interrupt sessions, and the client starts a new session after reconnecting.
+- Unity `6000.3.16f1` compiled the project and exported `RedEden-Full-System.unitypackage` (23,463,648 bytes).
+- The RED EDEN ARES EditMode assembly passed all 9 tests: PCM resampling and player-vitals defaults/fallback.
+- The RED EDEN Crafting EditMode assembly passed all 6 tests.
+- The package audit found 307 asset paths, including the hydroponic farm model, agricultural-silo prefab, and item/crafting databases; it found no scenes, Devion assets, or Starter Assets.
+- The package imported into a clean Unity 6 project with the project's locally licensed Devion dependencies installed, then compiled with no C# errors.
+- No authenticated Gemini Live voice session or device-microphone round trip has been verified.
+- The public `https://red-eden.onrender.com` service must not be considered Gemini Live-ready until its authenticated `/api/ares/live` WebSocket is tested against a current deployment. `/health` alone is not sufficient.
+- Do not add API keys, session tokens, raw audio, or unredacted transcripts to this report.

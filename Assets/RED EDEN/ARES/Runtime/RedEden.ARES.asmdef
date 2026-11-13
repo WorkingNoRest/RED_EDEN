@@ -4,8 +4,7 @@
         "Unity.InputSystem",
         "GUID:bc341db340573d349b7e439dd3350736",
         "GUID:7e11b191bda03244cab010a91ca9c4d9",
-        "GUID:d5a642db0ab7c1848ae48b71af583f9b",
-        "com.whisper.unity"
+        "GUID:d5a642db0ab7c1848ae48b71af583f9b"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -9,9 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07953c33a256d044391ad085f3da8587, type: 3}
-  m_Name: ARESLocalBridgeConfiguration
+  m_Script: {fileID: 11500000, guid: 6d6b392dbb6b4100b55f488cbb27b8c1, type: 3}
+  m_Name: ARES_GeminiLiveConfiguration
   m_EditorClassIdentifier:
-  endpoint: http://localhost:11434/api/generate
-  model: qwen2.5:3b
-  timeoutSeconds: 90
+  backendBaseUrl: https://red-eden.onrender.com
+  defaultLanguage: Arabic
