@@ -12,7 +12,7 @@ import time
 import uuid
 from collections import defaultdict, deque
 from pathlib import Path
-from typing import Any, Deque, Dict, Optional, Tuple
+from typing import Any, Deque, Dict, List, Optional, Tuple
 from urllib.parse import urlencode
 
 import websockets
@@ -141,15 +141,24 @@ def _log_upstream_diagnostic(
     error_code: Optional[int] = None,
     error_status: Optional[str] = None,
     message: str = "",
+    frame_type: str = "unknown",
+    frame_opcode: str = "unknown",
+    frame_length: Optional[int] = None,
+    utf8_valid: Optional[bool] = None,
+    json_keys: Optional[List[str]] = None,
+    classification: str = "unknown",
     level: int = logging.WARNING,
 ) -> None:
     auth_result = "unknown" if auth_accepted is None else ("accepted" if auth_accepted else "rejected")
     safe_status = _sanitize_upstream_message(error_status) or "unknown"
     safe_message = _sanitize_upstream_message(message) or "none"
+    safe_keys = json.dumps(json_keys if json_keys is not None else [], separators=(",", ":"))
+    safe_utf8_valid = "unknown" if utf8_valid is None else str(utf8_valid).lower()
     logger.log(
         level,
         "Gemini Live upstream stage=%s endpoint=%s api_version=%s model=%s "
         "http_status=%s close_code=%s auth_accepted=%s setup_accepted=%s "
+        "frame_type=%s frame_opcode=%s frame_length=%s utf8_valid=%s classification=%s json_keys=%s "
         "error_code=%s error_status=%s message=%s",
         stage,
         UPSTREAM_WS_URL,
@@ -159,10 +168,102 @@ def _log_upstream_diagnostic(
         close_code if close_code is not None else "unknown",
         auth_result,
         str(setup_accepted).lower(),
+        frame_type,
+        frame_opcode,
+        frame_length if frame_length is not None else "unknown",
+        safe_utf8_valid,
+        classification,
+        safe_keys,
         error_code if error_code is not None else "unknown",
         safe_status,
         safe_message,
     )
+
+
+def _safe_json_top_level_keys(payload: Dict[str, Any]) -> List[str]:
+    keys = []
+    for key in payload:
+        safe_key = key if isinstance(key, str) and re.fullmatch(r"[A-Za-z0-9_]{1,64}", key) else "[other]"
+        keys.append(safe_key)
+    keys = sorted(set(keys))
+    if len(keys) > 16:
+        return keys[:16] + ["..."]
+    return keys
+
+
+def _parse_upstream_setup_frame(frame: Any) -> Tuple[Any, Dict[str, Any]]:
+    if isinstance(frame, str):
+        frame_type = "str"
+        frame_opcode = "TEXT"
+        frame_length = len(frame.encode("utf-8", errors="replace"))
+        text = frame
+    elif isinstance(frame, bytes):
+        frame_type = "bytes"
+        frame_opcode = "BINARY"
+        frame_length = len(frame)
+        try:
+            text = frame.decode("utf-8")
+        except UnicodeDecodeError:
+            return None, {
+                "frame_type": frame_type,
+                "frame_opcode": frame_opcode,
+                "frame_length": frame_length,
+                "utf8_valid": False,
+                "json_keys": [],
+                "classification": "invalid_utf8",
+            }
+    else:
+        frame_type = type(frame).__name__
+        if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", frame_type):
+            frame_type = "unexpected"
+        frame_length = len(frame) if isinstance(frame, (bytearray, memoryview)) else None
+        return None, {
+            "frame_type": frame_type,
+            "frame_opcode": "unknown",
+            "frame_length": frame_length,
+            "utf8_valid": None,
+            "json_keys": [],
+            "classification": "unexpected_frame_type",
+        }
+
+    details = {
+        "frame_type": frame_type,
+        "frame_opcode": frame_opcode,
+        "frame_length": frame_length,
+        "utf8_valid": True,
+        "json_keys": [],
+        "classification": "unknown",
+    }
+    if not text:
+        details["classification"] = "empty_frame"
+        return None, details
+
+    try:
+        payload = json.loads(text)
+    except (json.JSONDecodeError, RecursionError):
+        details["classification"] = "malformed_json"
+        return None, details
+
+    if not isinstance(payload, dict):
+        details["classification"] = "unexpected_json_value"
+        return payload, details
+
+    details["json_keys"] = _safe_json_top_level_keys(payload)
+    if "error" in payload:
+        error_code, error_status, error_message = _upstream_error_details(payload)
+        details.update(
+            {
+                "classification": "error_envelope",
+                "error_code": error_code,
+                "error_status": error_status,
+                "error_message": error_message,
+            }
+        )
+    elif "setupComplete" in payload:
+        details["classification"] = "setup_complete"
+    else:
+        details["classification"] = "unexpected_json_envelope"
+    return payload, details
 
 
 def _handshake_error_details(exception: Exception) -> Tuple[Optional[int], Optional[str], str]:
@@ -724,45 +825,34 @@ async def live_session(websocket: WebSocket) -> None:
         )
         await upstream.send(json.dumps(setup, separators=(",", ":"), ensure_ascii=False))
         setup_reply = await asyncio.wait_for(upstream.recv(), timeout=15)
-        if not isinstance(setup_reply, str):
+        _, frame_details = _parse_upstream_setup_frame(setup_reply)
+        if frame_details["classification"] != "setup_complete":
+            classification = frame_details["classification"]
+            default_messages = {
+                "empty_frame": "Gemini Live returned an empty setup frame.",
+                "invalid_utf8": "Gemini Live returned a binary setup frame that is not UTF-8.",
+                "malformed_json": "Gemini Live returned malformed JSON during setup.",
+                "unexpected_frame_type": "Gemini Live returned an unsupported setup frame type.",
+                "unexpected_json_value": "Gemini Live returned a non-object JSON setup response.",
+                "unexpected_json_envelope": "Gemini Live did not return setupComplete.",
+                "error_envelope": "Gemini Live rejected the setup message.",
+            }
             _log_upstream_diagnostic(
                 "setup",
                 http_status=101,
                 close_code=getattr(upstream, "close_code", None),
                 auth_accepted=True,
-                message="Expected a text setup response from Gemini Live.",
-            )
-            raise RuntimeError("Gemini Live setup failed.")
-        try:
-            parsed_setup_reply = json.loads(setup_reply)
-        except json.JSONDecodeError as exception:
-            _log_upstream_diagnostic(
-                "setup",
-                http_status=101,
-                close_code=getattr(upstream, "close_code", None),
-                auth_accepted=True,
-                message="Gemini Live returned invalid JSON during setup.",
-            )
-            raise RuntimeError("Gemini Live setup failed.") from exception
-        if isinstance(parsed_setup_reply, dict) and "error" in parsed_setup_reply:
-            error_code, error_status, error_message = _upstream_error_details(parsed_setup_reply)
-            _log_upstream_diagnostic(
-                "setup",
-                http_status=101,
-                close_code=getattr(upstream, "close_code", None),
-                auth_accepted=True,
-                error_code=error_code,
-                error_status=error_status,
-                message=error_message or "Gemini Live rejected the setup message.",
-            )
-            raise RuntimeError("Gemini Live setup failed.")
-        if not isinstance(parsed_setup_reply, dict) or "setupComplete" not in parsed_setup_reply:
-            _log_upstream_diagnostic(
-                "setup",
-                http_status=101,
-                close_code=getattr(upstream, "close_code", None),
-                auth_accepted=True,
-                message="Gemini Live did not return setupComplete.",
+                error_code=frame_details.get("error_code"),
+                error_status=frame_details.get("error_status"),
+                message=frame_details.get("error_message") or default_messages.get(
+                    classification, "Gemini Live returned an unexpected setup response."
+                ),
+                frame_type=frame_details["frame_type"],
+                frame_opcode=frame_details["frame_opcode"],
+                frame_length=frame_details["frame_length"],
+                utf8_valid=frame_details["utf8_valid"],
+                json_keys=frame_details["json_keys"],
+                classification=classification,
             )
             raise RuntimeError("Gemini Live setup failed.")
         upstream_setup_accepted = True
@@ -771,6 +861,12 @@ async def live_session(websocket: WebSocket) -> None:
             http_status=101,
             auth_accepted=True,
             setup_accepted=True,
+            frame_type=frame_details["frame_type"],
+            frame_opcode=frame_details["frame_opcode"],
+            frame_length=frame_details["frame_length"],
+            utf8_valid=frame_details["utf8_valid"],
+            json_keys=frame_details["json_keys"],
+            classification=frame_details["classification"],
             level=logging.INFO,
         )
 
@@ -828,7 +924,7 @@ async def live_session(websocket: WebSocket) -> None:
         close_code, close_reason = _upstream_close_details(exception)
         auth_accepted = True if upstream is not None else (False if status_code in (401, 403) else None)
         _log_upstream_diagnostic(
-            "relay" if upstream_setup_accepted else "connect",
+            "relay" if upstream_setup_accepted else ("setup" if upstream is not None else "connect"),
             http_status=101 if upstream is not None else status_code,
             close_code=(
                 close_code
