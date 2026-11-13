@@ -43,6 +43,8 @@ The session is anonymous and does not prove player identity. Add verification of
 
 The backend server logs contain a sanitized `Gemini Live upstream` diagnostic for connection, setup, and relay failures. It includes the configured endpoint/API version/model, upstream HTTP status when available, WebSocket close code, authentication/setup acceptance state, and a sanitized error status/message. Gemini keys, ARES bearer tokens, authorization headers, full request payloads, and credential-bearing URLs are not logged or returned to Unity. A successful health check or ARES session issuance does not prove that the upstream Gemini Live connection succeeded; only the actual `setupComplete` event marks setup accepted.
 
+Relay validation failures are logged with a fixed `stage` and `diagnostic` code. These codes identify whether the backend rejected client audio/control data or an upstream response without logging message contents, transcripts, or audio.
+
 ## Verification limits
 
 The official model documentation lists `gemini-3.8-live` as stable and supports these protocol features. Account-specific API-key entitlement, actual upstream calls, Arabic/Egyptian-Arabic quality, device microphone behavior, and Unity runtime playback require credentials and a Unity runtime; they are not claimed as tested by local compilation or backend unit tests.

@@ -57,6 +57,31 @@ ALLOWED_LIVE_TOOLS = {
 }
 _JWT_HEADER = {"alg": "HS256", "typ": "JWT"}
 
+_LIVE_VALUE_ERROR_DIAGNOSTICS = {
+    "Audio chunks must be bounded 16-bit PCM.": ("client_audio", "invalid_pcm_chunk"),
+    "Control message is too large.": ("client_control", "control_message_too_large"),
+    "Control message must be valid JSON.": ("client_control", "invalid_control_json"),
+    "Control message type is required.": ("client_control", "missing_control_type"),
+    "Message rate limit exceeded.": ("client", "message_rate_limit_exceeded"),
+    "Archive context is invalid or too large.": ("client_control", "invalid_archive_context"),
+    "Invalid tool response batch.": ("client_control", "invalid_tool_response_batch"),
+    "Invalid tool response.": ("client_control", "invalid_tool_response"),
+    "Tool response does not match a pending read-only call.": ("client_control", "unmatched_tool_response"),
+    "Tool response is too large.": ("client_control", "tool_response_too_large"),
+    "Unsupported control message type.": ("client_control", "unsupported_control_type"),
+    "Unsupported WebSocket message.": ("client", "unsupported_websocket_message"),
+    "Invalid upstream message size.": ("upstream", "invalid_upstream_frame_size"),
+    "Invalid upstream message.": ("upstream", "invalid_upstream_json"),
+    "Invalid upstream audio.": ("upstream_audio", "invalid_audio_encoding"),
+    "Invalid upstream audio size.": ("upstream_audio", "invalid_audio_size"),
+    "Invalid function call batch.": ("upstream_tools", "invalid_function_call_batch"),
+    "Invalid function call.": ("upstream_tools", "invalid_function_call"),
+    "Unsupported function call.": ("upstream_tools", "unsupported_function_call"),
+    "Function arguments are too large.": ("upstream_tools", "function_arguments_too_large"),
+    "Too many pending function calls.": ("upstream_tools", "too_many_pending_function_calls"),
+    "Duplicate pending function call.": ("upstream_tools", "duplicate_function_call"),
+}
+
 limiter = Limiter(
     key_func=get_remote_address,
     storage_uri=os.getenv("ARES_RATE_LIMIT_STORAGE_URI", "memory://"),
@@ -96,6 +121,13 @@ def _sanitize_upstream_message(message: Any) -> str:
         sanitized,
     )
     return sanitized[:500]
+
+
+def _live_value_error_diagnostic(exception: ValueError) -> Tuple[str, str]:
+    return _LIVE_VALUE_ERROR_DIAGNOSTICS.get(
+        str(exception),
+        ("relay", "unclassified_value_error"),
+    )
 
 
 def _upstream_error_details(payload: Dict[str, Any]) -> Tuple[Optional[int], Optional[str], str]:
@@ -913,7 +945,15 @@ async def live_session(websocket: WebSocket) -> None:
         )
         await _send_client_error(websocket, "Gemini Live setup or connection timed out.")
     except (ValueError, RuntimeError) as exception:
-        logger.warning("ARES Live session ended: %s", type(exception).__name__)
+        if isinstance(exception, ValueError):
+            diagnostic_stage, diagnostic_code = _live_value_error_diagnostic(exception)
+            logger.warning(
+                "ARES Live session ended: ValueError stage=%s diagnostic=%s",
+                diagnostic_stage,
+                diagnostic_code,
+            )
+        else:
+            logger.warning("ARES Live session ended: %s", type(exception).__name__)
         try:
             await _send_client_error(websocket, "ARES Live encountered an invalid or unavailable upstream response.")
         except (WebSocketDisconnect, OSError, RuntimeError):

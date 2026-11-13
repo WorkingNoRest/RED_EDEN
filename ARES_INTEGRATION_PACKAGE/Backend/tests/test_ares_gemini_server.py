@@ -65,6 +65,22 @@ class SessionAuthenticationTests(unittest.TestCase):
 
 
 class LiveProtocolTests(unittest.TestCase):
+    def test_live_value_error_diagnostics_are_fixed_and_stage_specific(self):
+        cases = (
+            (ValueError("Audio chunks must be bounded 16-bit PCM."), ("client_audio", "invalid_pcm_chunk")),
+            (ValueError("Invalid upstream audio size."), ("upstream_audio", "invalid_audio_size")),
+            (ValueError("Unsupported function call."), ("upstream_tools", "unsupported_function_call")),
+        )
+        for exception, expected in cases:
+            with self.subTest(diagnostic=expected[1]):
+                self.assertEqual(server._live_value_error_diagnostic(exception), expected)
+
+        private_detail = "speech payload should never appear in diagnostics"
+        self.assertEqual(
+            server._live_value_error_diagnostic(ValueError(private_detail)),
+            ("relay", "unclassified_value_error"),
+        )
+
     def test_upstream_error_sanitizer_redacts_key_and_session_token(self):
         api_key = "AIza" + "SyFakeTestCredentialValue000000000"
         token = "headersegment.payloadsegment.signaturesegment"
