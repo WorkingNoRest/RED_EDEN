@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e14be5e3e6cf2204293682bf65bce5dc, type: 3}
+  m_Name: Compacted Regolith Brick
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.Item
+  m_Id: f4590e8a-f07b-453d-b43f-306338a0b032
+  m_ItemName: Compacted Regolith Brick
+  m_UseItemNameAsDisplayName: 1
+  m_DisplayName: Compacted Regolith Brick
+  m_Icon: {fileID: 21300000, guid: f8aa15e1c93b6254096a719de83f4c92, type: 3}
+  m_Prefab: {fileID: 3761956806776793548, guid: 6ea98e859ebaecc4780adf5cbcb1ae46, type: 3}
+  m_Description: A printed structural brick made from compacted Martian regolith.
+  m_Category: {fileID: 0}
+  m_IsSellable: 0
+  m_BuyPrice: 0
+  m_CanBuyBack: 1
+  m_BuyCurrency: {fileID: 0}
+  m_SellPrice: 0
+  m_SellCurrency: {fileID: 0}
+  m_Stack: 1
+  m_MaxStack: 50
+  m_IsDroppable: 1
+  m_DropSound: {fileID: 0}
+  m_OverridePrefab: {fileID: 3784722797130702596, guid: cc25180dd3fb13f418d11a9bd87471b8, type: 3}
+  m_IsCraftable: 1
+  m_CraftingDuration: 2
+  m_UseCraftingSkill: 0
+  m_SkillWindow: Skills
+  m_CraftingSkill: {fileID: 0}
+  m_RemoveIngredientsWhenFailed: 0
+  m_MinCraftingSkillValue: 0
+  m_CraftingAnimatorState: Blacksmithy
+  m_CraftingModifier:
+    modifiers:
+    - {fileID: 0}
+  ingredients:
+  - item: {fileID: 11400000, guid: d708d618f110b934d98ee95104f3d24f, type: 2}
+    amount: 5
+  properties: []

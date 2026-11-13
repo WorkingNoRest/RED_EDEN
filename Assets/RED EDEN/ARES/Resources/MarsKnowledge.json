@@ -1,0 +1,188 @@
+{
+  "records": [
+    {
+      "id": "mars-atmospheric-pressure",
+      "title": "Surface atmospheric pressure on Mars",
+      "summary": "Mars has a very thin atmosphere. Typical surface pressure is around 600 pascals, less than one percent of Earth's sea-level pressure, and varies with elevation, season, weather, and the seasonal exchange of carbon dioxide with the polar caps.",
+      "content": "The pressure at a landing site is not a single planet-wide constant. Curiosity measurements at Gale Crater and other landed missions show pressures on the order of hundreds of pascals; the global mean is commonly summarized as roughly 610 Pa (about 6.1 millibars). Higher elevations generally have lower pressure, while the annual condensation and sublimation of polar carbon dioxide changes the total atmospheric mass and pressure through the Martian year. A local reading should therefore be identified with its location, season, and measurement time rather than treated as a universal value.",
+      "keywords": ["atmospheric pressure", "surface pressure", "air pressure", "pascals", "millibars", "thin atmosphere", "Gale Crater", "barometer"],
+      "source": "NASA Solar System Exploration, Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Climate Sounder / Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "mars-atmospheric-composition",
+      "title": "Composition of the Martian atmosphere",
+      "summary": "The present Martian atmosphere is dominated by carbon dioxide. NASA reference summaries give an approximate composition of 95 percent carbon dioxide, 2.7 percent nitrogen, and 1.6 percent argon, with smaller traces of other gases.",
+      "content": "The atmosphere is overwhelmingly carbon dioxide, unlike Earth's nitrogen-oxygen atmosphere. Approximate values often quoted for the dry atmosphere are about 95.3 percent CO2, 2.7 percent nitrogen, and 1.6 percent argon; minor constituents include oxygen, carbon monoxide, and water vapor. The proportions can vary slightly with measurement, season, and altitude. Water vapor is present only in small, variable amounts, and the thin air does not provide breathable oxygen or Earth-like surface pressure. These are representative global composition figures, not a live measurement from a particular location.",
+      "keywords": ["atmospheric composition", "carbon dioxide", "CO2", "nitrogen", "argon", "oxygen", "air", "gases", "95 percent"],
+      "source": "NASA Solar System Exploration, Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-carbon-dioxide-cycle",
+      "title": "Seasonal carbon-dioxide cycle and pressure",
+      "summary": "During winter, carbon dioxide freezes onto the seasonal polar cap; during spring and summer, it returns to the atmosphere. This exchange changes atmospheric mass and contributes to seasonal pressure and circulation changes.",
+      "content": "Mars's polar regions act as seasonal reservoirs for atmospheric CO2. Cooling during polar winter causes carbon dioxide frost to condense on the surface; sunlight and warming in spring cause much of that seasonal frost to sublime back into the atmosphere. The exchange is large enough to produce measurable annual changes in global atmospheric pressure and affects winds and weather. It is not the same as the much smaller seasonal water-ice cycle. Carbon dioxide also forms permanent polar deposits, especially at the south pole, alongside water ice.",
+      "keywords": ["carbon dioxide cycle", "CO2 frost", "seasonal pressure", "polar cap", "sublimation", "condensation", "winter", "spring"],
+      "source": "NASA Mars Climate Sounder / Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/ ; NASA Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-climate-temperature",
+      "title": "Martian surface temperatures and seasons",
+      "summary": "Mars is cold and has large temperature swings. NASA describes an average temperature near minus 65 degrees Celsius, with local temperatures varying widely by season, time of day, latitude, and elevation.",
+      "content": "The average figure is only a broad planetary summary, not a reliable site forecast. Because the atmosphere is thin, it stores and transports less heat than Earth's atmosphere, so day-to-night temperature changes can be substantial. Temperatures also depend on latitude, season, surface properties, elevation, and weather. Mars has seasons because its rotational axis is tilted, and its orbit is more eccentric than Earth's, making seasons unequal in duration and strength between hemispheres. A mission habitat or suit should rely on local calibrated instruments and engineering limits rather than the global average.",
+      "keywords": ["temperature", "cold", "climate", "seasons", "day night", "average temperature", "minus 65", "weather"],
+      "source": "NASA Solar System Exploration, Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-regolith-composition",
+      "title": "Martian soil and regolith composition",
+      "summary": "Martian surface material is a mixture of weathered rock, mineral grains, and fine dust. Orbiter and rover observations identify basaltic materials, iron-bearing minerals, and widespread oxidized dust; composition varies from place to place.",
+      "content": "Regolith is the loose layer of dust, soil, broken rock, and impact-generated material covering bedrock. Mars rover instruments have measured basaltic igneous materials and diverse minerals shaped by volcanism, impacts, water, and chemical weathering. Iron-bearing minerals contribute to the planet's reddish appearance when iron oxidizes. Orbital spectroscopy also maps hydrated minerals and other alteration products in selected terrains. There is no single uniform recipe for Martian soil: local geology, transport, weathering, and alteration determine the composition of a specific sample. A rover's analysis applies to its sampled location and should not be generalized to every region.",
+      "keywords": ["regolith", "soil", "surface material", "basalt", "minerals", "iron oxide", "dust", "rock", "composition"],
+      "source": "NASA Mars Exploration Program, Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "mars-perchlorates",
+      "title": "Perchlorate salts in Martian soil",
+      "summary": "NASA's Phoenix lander detected perchlorate salts in Arctic Martian soil. Perchlorates are chemically important and can affect water chemistry; their detection at Phoenix is not proof that every location has the same concentration.",
+      "content": "Phoenix analyzed soil in the northern plains and reported evidence for perchlorate, an oxidizing chlorine-oxygen salt. Perchlorates can lower the freezing point of water and influence how salts interact with moisture, but the stability and behavior depend on local temperature, humidity, mineralogy, and concentration. The Phoenix result is a measurement from its landing site and is not a universal soil assay for Mars. For mission safety, perchlorate is a relevant chemical hazard and resource-processing consideration; a real habitat or extraction system needs site-specific sampling and toxicology controls.",
+      "keywords": ["perchlorate", "perchlorates", "Phoenix lander", "soil salts", "chemistry", "oxidizer", "Arctic soil", "water brine"],
+      "source": "NASA Phoenix Mars Lander: https://science.nasa.gov/mission/phoenix/ ; NASA Phoenix mission science archive"
+    },
+    {
+      "id": "mars-subsurface-water-ice",
+      "title": "Subsurface water ice on Mars",
+      "summary": "Orbital neutron measurements, radar soundings, and lander observations provide evidence for water ice beneath or at the surface in multiple Martian regions. Ice depth and abundance vary with latitude and local geology.",
+      "content": "Mars Odyssey neutron measurements mapped near-surface hydrogen, often interpreted as water ice at high latitudes. The SHARAD radar on Mars Reconnaissance Orbiter has identified buried ice-rich deposits, while Phoenix directly exposed and observed ice in its northern landing area. These different methods probe different depths and terrains, so they do not imply a continuous accessible ice layer everywhere. Potential mission resources must be confirmed by local prospecting, depth measurements, purity analysis, and extraction tests. Radar or hydrogen detections are evidence of ice-rich material, not a guarantee of immediately harvestable liquid water.",
+      "keywords": ["subsurface ice", "water ice", "buried ice", "SHARAD", "Mars Odyssey", "hydrogen", "ice deposits", "ground ice"],
+      "source": "NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/ ; NASA Phoenix Mars Lander: https://science.nasa.gov/mission/phoenix/"
+    },
+    {
+      "id": "mars-liquid-water-stability",
+      "title": "Liquid water stability at the Martian surface",
+      "summary": "Today's low pressure and cold surface conditions make persistent exposed liquid water unstable across most of Mars. Ice and hydrated minerals are better-supported present-day reservoirs than long-lived open surface water.",
+      "content": "Pure liquid water is difficult to maintain at the surface because Martian atmospheric pressure is near water's triple-point pressure and temperatures are commonly low. Salts can change freezing behavior, and transient liquid-like processes have been discussed, but their occurrence and interpretation are site- and condition-dependent. Orbital slope streaks or seasonal features should not be described as confirmed flowing liquid water without specific supporting evidence. The robust broad picture is that Mars preserves abundant evidence of ancient surface water and present-day water ice, while stable exposed lakes and rivers are not characteristic of the modern climate.",
+      "keywords": ["liquid water", "brine", "water stability", "triple point", "flowing water", "modern Mars", "surface water", "ice"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "mars-ancient-water-history",
+      "title": "Evidence for ancient rivers, lakes, and a wetter Mars",
+      "summary": "Orbital and rover observations reveal ancient channels, lake deposits, deltas, and water-altered minerals. They indicate that liquid water shaped parts of early Mars, but do not by themselves establish that life existed.",
+      "content": "Mars preserves landforms and minerals associated with flowing water and long-lived interaction between water and rock. Examples include branching valley networks, sedimentary deposits, clay-bearing terrains, and fan-shaped deltas. Their distribution and age vary, and scientists reconstruct ancient environments using multiple lines of evidence such as stratigraphy, mineralogy, and crater chronology. A past habitable environment is a scientific question distinct from detecting life: water-related geology alone is not proof of past or present organisms. NASA missions investigate whether ancient environments could have supported microbial life and preserve signs of it.",
+      "keywords": ["ancient water", "rivers", "lakes", "wet Mars", "valley networks", "delta", "habitability", "clay minerals"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars 2020 Perseverance mission: https://science.nasa.gov/mission/mars-2020-perseverance/"
+    },
+    {
+      "id": "jezero-crater-topography",
+      "title": "Jezero Crater topography and ancient lake delta",
+      "summary": "Jezero is an approximately 45-kilometer-wide impact crater selected as the Perseverance landing site. Orbital images show an inlet valley and a prominent western delta-shaped deposit with layered sediments.",
+      "content": "Jezero lies at the edge of the ancient highlands and contains a crater basin connected to former water-carved channels. The western delta deposit records sediment transported into the crater; an outlet channel provides additional evidence for a former lake system. Perseverance explores the crater floor, delta front, and margin units to study geology and collect carefully documented samples. The crater's topography supports reconstruction of a lake-and-river environment, but shoreline extent, duration, and changing water chemistry remain scientific questions. Jezero's local geology should not be assumed representative of all Martian terrain.",
+      "keywords": ["Jezero", "Jezero Crater", "topography", "Perseverance", "delta", "lake", "inlet", "outlet", "45 kilometers"],
+      "source": "NASA Mars 2020 Perseverance mission: https://science.nasa.gov/mission/mars-2020-perseverance/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "mars-delta-sediments",
+      "title": "Jezero delta sediment layers and sample science",
+      "summary": "Perseverance studies layered rocks and sedimentary materials at Jezero's ancient delta. Such deposits can preserve environmental history and potential biosignature evidence, but no confirmed Martian life has been announced.",
+      "content": "River deltas concentrate and sort sediment as water enters a standing body, producing deposits that can preserve changing conditions over time. At Jezero, rover imaging and instruments characterize rock textures, mineralogy, and stratigraphic relationships, while the mission caches selected samples for possible future return to Earth. The scientific goal includes assessing ancient habitability and searching for potential biosignatures. A potentially interesting texture or organic molecule is not by itself proof of biology; confirmation requires context, contamination controls, and multiple independent analyses. This record describes the investigation, not a claim that life was found.",
+      "keywords": ["delta sediments", "Jezero", "sample caching", "biosignature", "organic molecules", "layered rocks", "sedimentary geology", "sample return"],
+      "source": "NASA Mars 2020 Perseverance mission: https://science.nasa.gov/mission/mars-2020-perseverance/"
+    },
+    {
+      "id": "mars-ultraviolet-radiation",
+      "title": "Ultraviolet radiation at the Martian surface",
+      "summary": "Mars's thin atmosphere and lack of an Earth-like global ozone shield allow substantially more solar ultraviolet radiation to reach the surface than at Earth's surface. Dust, clouds, season, and local conditions affect exposure.",
+      "content": "The Martian atmosphere provides limited shielding against ultraviolet wavelengths compared with Earth's atmosphere, which has a protective ozone layer. Surface UV flux varies with solar angle, season, latitude, atmospheric dust, and transient cloud or haze conditions. UV is one component of a broader radiation environment and should not be conflated with galactic cosmic rays or solar energetic particles, which have different sources and shielding behavior. A surface habitat needs engineered shielding and environmental monitoring; a single general statement about UV does not replace a site-specific dose measurement.",
+      "keywords": ["ultraviolet", "UV radiation", "ozone", "solar radiation", "surface exposure", "thin atmosphere", "shielding"],
+      "source": "NASA Mars Science Laboratory / Curiosity radiation and environment research: https://science.nasa.gov/mission/msl-curiosity/ ; NASA Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-ionizing-radiation-curiosity",
+      "title": "Ionizing radiation measured by Curiosity's RAD instrument",
+      "summary": "Curiosity's Radiation Assessment Detector measured energetic particle radiation during cruise and on the Martian surface. Dose varies with solar activity, shielding, altitude, and time; published mission averages are not universal instantaneous hazard limits.",
+      "content": "The Radiation Assessment Detector (RAD) on the Curiosity rover measured charged particles and radiation relevant to the surface environment and a future human journey. NASA reported a surface absorbed-dose rate on the order of 0.21 milligray per day for the measurement period, while equivalent-dose estimates and cruise values differ because radiation types and biological weighting differ. Measurements vary over time, including with solar activity and atmospheric shielding. Gray and sievert are different quantities and should not be interchanged. A crew safety decision requires the relevant dose quantity, integration period, shielding, and instrument calibration rather than a single headline number.",
+      "keywords": ["radiation", "ionizing radiation", "RAD", "Curiosity", "dose", "milligray", "millisievert", "cosmic rays", "solar particles"],
+      "source": "NASA Curiosity Mars rover and Radiation Assessment Detector (RAD): https://science.nasa.gov/mission/msl-curiosity/"
+    },
+    {
+      "id": "mars-global-dust-storms",
+      "title": "Regional and global Martian dust storms",
+      "summary": "Mars experiences dust storms ranging from local events to planet-encircling storms. Large storms can obscure the surface, warm the atmosphere, alter circulation, and reduce sunlight reaching solar-powered hardware.",
+      "content": "Dust lifting is controlled by winds, surface conditions, atmospheric stability, and seasonal forcing. Some storms remain regional; under favorable conditions, dust activity can expand until much of the planet is affected. A global dust event changes atmospheric temperature structure and circulation and may persist for weeks or months, but it is not an annual clockwork event with a guaranteed start date. Dust can strongly reduce direct sunlight at the surface, as observed during the 2018 global storm that ended operations of the solar-powered Opportunity rover. Forecasting needs ongoing orbital and surface observations.",
+      "keywords": ["dust storm", "global dust storm", "planet encircling", "regional storm", "Opportunity", "solar power", "dust opacity", "weather"],
+      "source": "NASA Mars Climate and Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/ ; NASA Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-dust-properties",
+      "title": "Martian dust, atmospheric suspension, and solar panels",
+      "summary": "Fine Martian dust can be suspended and transported by the atmosphere and can settle onto equipment. Dust affects visibility, atmospheric heating, and solar-array performance; cleaning and storm behavior are engineering concerns.",
+      "content": "The red planet's fine surface particles can be mobilized by winds and dust devils. Suspended dust absorbs and scatters sunlight, heating parts of the atmosphere while reducing surface illumination. Settled dust can accumulate on exposed surfaces, including solar panels, although actual deposition and cleaning depend on location, season, hardware, and local winds. A storm's opacity and duration matter more for power planning than a generic statement that every storm completely blocks sunlight. Dust is not known to behave exactly like Earth's sand: grain sizes, electrostatic effects, and atmospheric conditions differ.",
+      "keywords": ["Martian dust", "dust deposition", "solar panel", "solar array", "power", "visibility", "suspended dust", "dust opacity"],
+      "source": "NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/ ; NASA Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-dust-devils",
+      "title": "Dust devils and surface wind activity",
+      "summary": "Dust devils are rotating convective vortices that lift dust from the surface. Rovers have observed dust-devil tracks and passing vortices; their occurrence depends on local heating, surface conditions, and weather.",
+      "content": "When sunlight heats the ground, rising warm air can form a rotating vortex under suitable atmospheric conditions. If the vortex is strong enough, it lifts dust and becomes visible; moving dust devils can leave tracks that orbital cameras later observe. Their passage can briefly change local pressure, wind, and dust loading. Dust devils may redistribute dust and can sometimes clean exposed surfaces, but that effect is variable and should not be treated as guaranteed equipment maintenance. Not every clear day or location experiences a detectable dust devil.",
+      "keywords": ["dust devil", "vortex", "wind", "convective", "dust tracks", "surface heating", "pressure drop", "weather"],
+      "source": "NASA Mars Exploration Program, Mars weather and rover observations: https://science.nasa.gov/mars/facts/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "olympus-mons-geology",
+      "title": "Olympus Mons shield volcano",
+      "summary": "Olympus Mons is a giant shield volcano in the Tharsis region and the largest known volcano in the Solar System. Its broad, gently sloping form reflects extensive effusive volcanic construction in Mars's low-gravity environment.",
+      "content": "Olympus Mons rises roughly 22 kilometers above the surrounding plains when measured from its base, though quoted heights depend on the chosen datum and reference terrain. The volcano is about 600 kilometers across and has broad shield-like slopes built mainly by repeated lava flows. Its summit caldera complex contains nested collapse features. The immense size is enabled in part by Mars lacking Earth's style of moving plate tectonics that would carry a crustal plate away from a long-lived volcanic source, along with differences in gravity and volcanic history. Its dimensions do not mean the volcano is currently erupting.",
+      "keywords": ["Olympus Mons", "volcano", "shield volcano", "Tharsis", "geology", "lava", "caldera", "largest volcano", "22 kilometers"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Global Surveyor and Mars Reconnaissance Orbiter topography"
+    },
+    {
+      "id": "mars-tharsis-volcanic-province",
+      "title": "Tharsis volcanic province and Mars's crust",
+      "summary": "Tharsis is a broad volcanic and tectonic province that includes Olympus Mons and several large shield volcanoes. Its immense volcanic loading is associated with regional uplift, fractures, and the nearby Valles Marineris canyon system.",
+      "content": "The Tharsis region is a vast elevated area containing multiple large volcanoes and extensive lava plains. Long-lived volcanism and crustal deformation produced major landforms, including fractures and graben. Valles Marineris lies east of Tharsis and is a tectonic canyon system, not a river-carved valley of the same origin as terrestrial canyons. The exact timing and mechanisms of Tharsis construction are active research topics. Geological association between Tharsis, regional fractures, and canyon formation should not be presented as a single simple event without specifying the evidence and model.",
+      "keywords": ["Tharsis", "volcanic province", "Olympus Mons", "volcanoes", "crust", "tectonics", "Valles Marineris", "fractures", "lava"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "valles-marineris-canyon",
+      "title": "Valles Marineris canyon system",
+      "summary": "Valles Marineris is a vast system of interconnected troughs near Mars's equator, extending thousands of kilometers. Its scale and geology are associated primarily with tectonic extension and later modification, not a single river-carved canyon.",
+      "content": "The canyon system is more than 4,000 kilometers long and in places reaches depths of several kilometers. It is often compared with Earth's Grand Canyon for scale, but the comparison is limited: Valles Marineris is dramatically longer and formed through different geological processes. Extension and fracturing of the crust, related to regional tectonic stresses and the Tharsis rise, are important in its origin; landslides, erosion, and possible water-related deposits modified parts of the system. Local chasms have distinct histories, so a single mechanism should not be used to explain every feature.",
+      "keywords": ["Valles Marineris", "canyon", "chasm", "tectonic", "trough", "Grand Canyon", "geology", "Tharsis"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "mars-polar-ice-caps",
+      "title": "Water ice and carbon-dioxide ice at the poles",
+      "summary": "Mars has polar layered deposits containing water ice, with seasonal carbon-dioxide frost forming and retreating as the seasons change. Permanent and seasonal components differ between the north and south poles.",
+      "content": "The bright polar caps are not composed solely of one kind of ice. Water ice forms much of the permanent polar deposits, while carbon dioxide freezes seasonally from the atmosphere and covers portions of the poles during winter. The north polar residual cap is primarily water ice; the south retains a permanent carbon-dioxide component in addition to water ice. Layering records climate variations over time. Seasonal cap extent and dust cover change with the Mars year. Descriptions of a polar cap should distinguish perennial water-rich deposits from the seasonal CO2 frost.",
+      "keywords": ["polar ice", "north pole", "south pole", "water ice", "carbon dioxide ice", "CO2 frost", "seasonal cap", "layered deposits"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/ ; NASA Mars Reconnaissance Orbiter: https://science.nasa.gov/mission/mars-reconnaissance-orbiter/"
+    },
+    {
+      "id": "mars-day-year-and-seasons",
+      "title": "Length of a Martian day and year",
+      "summary": "A Martian solar day, or sol, is about 24 hours and 39 minutes. A Martian year is about 687 Earth days, and Mars's axial tilt produces seasons that differ in length and intensity from Earth's.",
+      "content": "Mars rotates once in about 24.6 hours, so a sol is close to but longer than an Earth day. Its orbit takes approximately 687 Earth days, or about 669 sols. The axis is tilted by roughly 25 degrees, creating seasonal changes in sunlight. Because the orbit is more elliptical than Earth's, the hemispheres experience unequal seasonal durations and heating. This calendar matters for interpreting climate records, polar carbon-dioxide exchange, and rover mission timelines. Sol counts are mission-local operational dates and should not be confused with Earth calendar dates.",
+      "keywords": ["sol", "Martian day", "Mars year", "687 days", "seasons", "rotation", "orbit", "axial tilt", "calendar"],
+      "source": "NASA Mars Facts: https://science.nasa.gov/mars/facts/"
+    },
+    {
+      "id": "mars-gale-crater-lake",
+      "title": "Gale Crater's ancient lake and layered Mount Sharp",
+      "summary": "Curiosity's investigations in Gale Crater found sedimentary rocks and mineral evidence consistent with ancient environments where liquid water persisted at the surface. Mount Sharp exposes a long sequence of rock layers recording environmental change.",
+      "content": "Gale is an impact crater about 154 kilometers across. Curiosity landed there in 2012 and has examined its crater floor and the layered foothills of Mount Sharp. Mudstone, sedimentary structures, and water-related minerals support the interpretation that lakes and streams existed in parts of Gale's history. The rock record indicates environmental conditions changed over time; it does not mean a lake occupied the crater continuously or that the present crater contains a lake. Curiosity's evidence informs past habitability and geology at Gale specifically.",
+      "keywords": ["Gale Crater", "Curiosity", "Mount Sharp", "lake", "mudstone", "sedimentary rocks", "ancient water", "habitability"],
+      "source": "NASA Mars Science Laboratory / Curiosity: https://science.nasa.gov/mission/msl-curiosity/"
+    },
+    {
+      "id": "mars-insight-seismic-interior",
+      "title": "Mars interior and marsquakes measured by InSight",
+      "summary": "NASA's InSight lander used a seismometer to detect marsquakes and constrain the planet's interior structure. Seismic results provide evidence about crust, mantle, and core; they do not mean Mars is currently experiencing a dangerous surface earthquake everywhere.",
+      "content": "InSight operated a highly sensitive seismometer on the Martian surface and recorded seismic events from tectonic activity, impacts, and other sources. Analysis of seismic waves improved estimates of the crust, mantle, and liquid metallic core. Individual marsquakes are localized events, and their magnitude and distance matter when assessing local effects. Seismic science expands understanding of Mars's formation and thermal evolution. It is not a real-time global earthquake warning system, and an event detection does not automatically imply a hazard at a distant landing site.",
+      "keywords": ["InSight", "marsquake", "marsquakes", "seismometer", "seismic", "interior", "core", "mantle", "crust"],
+      "source": "NASA InSight Mars Lander: https://science.nasa.gov/mission/insight/ ; NASA InSight mission archive"
+    }
+  ]
+}

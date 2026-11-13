@@ -1,0 +1,222 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2432896587380329615
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2703881370705366561}
+  - component: {fileID: 6763658198157089931}
+  - component: {fileID: 3328870412587160673}
+  - component: {fileID: 8809222942302832080}
+  m_Layer: 0
+  m_Name: Hydroponic Farm M01 - Agricultural Silo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2703881370705366561
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2432896587380329615}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8079554982477019641}
+  - {fileID: 1419170377616863168}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6763658198157089931
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2432896587380329615}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8.63, y: 5.4000006, z: 4.625}
+  m_Center: {x: 0, y: 2.7000003, z: 0.012500048}
+--- !u!114 &3328870412587160673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2432896587380329615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a109d0903f5465381dffccc7a5c2a48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RedEden.Crafting::RedEden.Crafting.HydroponicFarm
+  delegates: []
+  useDistance: 2.5
+  triggerType: 9
+  key: 102
+  actionTemplate: {fileID: 0}
+  actions: []
+  m_Interruptable: 0
+  farmId: 25676956d49b4e2a973c179cd2162b0d
+  operational: 1
+  inventoryWindow: Inventory
+  activeCrop: 0
+  allowPlayerCropSwitch: 0
+  cycleCropKey: 102
+  maxStoredFood: 30
+  oxygenItem: {fileID: 11400000, guid: e3b1e0bcb33971340bfd4e0e23eb108c, type: 2}
+  oxygenAmount: 1
+  oxygenIntervalSeconds: 60
+  maxStoredOxygen: 10
+  potatoItem: {fileID: 11400000, guid: 6e10e495bc5843cc84cf91c594b1a580, type: 2}
+  potatoAmount: 3
+  potatoSeconds: 120
+  potatoTint: {r: 0.25, g: 0.5, b: 0.2, a: 1}
+  wheatItem: {fileID: 11400000, guid: c6c0e33aa9bf4ae18fd529c1ed80d109, type: 2}
+  wheatAmount: 4
+  wheatSeconds: 150
+  wheatTint: {r: 0.85, g: 0.7, b: 0.25, a: 1}
+  lettuceItem: {fileID: 11400000, guid: 80fae9087a6d49088e0e59e1b72f0b4b, type: 2}
+  lettuceAmount: 2
+  lettuceSeconds: 90
+  lettuceTint: {r: 0.45, g: 0.8, b: 0.3, a: 1}
+  plantRoots: []
+  minPlantScale: 0.25
+  references:
+    version: 2
+    RefIds: []
+--- !u!114 &8809222942302832080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2432896587380329615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcb30197910342b59c4d9424219f0bd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RedEden.Crafting::RedEden.Crafting.HydroponicFarmScreen
+  farm: {fileID: 3328870412587160673}
+  screenMount: {fileID: 1419170377616863168}
+  screenSizeMeters: {x: 0.9, y: 1.8}
+  canvasPixelWidth: 500
+  refreshInterval: 0.1
+  backgroundColor: {r: 0.02, g: 0.07, b: 0.08, a: 1}
+  headerColor: {r: 0, g: 0.45, b: 0.4, a: 1}
+  textColor: {r: 0.8, g: 1, b: 0.95, a: 1}
+  cropColor: {r: 0.4, g: 0.95, b: 0.4, a: 1}
+  oxygenColor: {r: 0.3, g: 0.8, b: 1, a: 1}
+  warningColor: {r: 1, g: 0.75, b: 0.2, a: 1}
+--- !u!1 &3203283659236112784
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1419170377616863168}
+  m_Layer: 0
+  m_Name: ScreenMount
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1419170377616863168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3203283659236112784}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 4.3250003, y: 1.5, z: 0.012500048}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2703881370705366561}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &8622951888938786322
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2703881370705366561}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+      propertyPath: m_Name
+      value: Model
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+--- !u!4 &8079554982477019641 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 98fb2b7b02c4c614282e6893fde34a67, type: 3}
+  m_PrefabInstance: {fileID: 8622951888938786322}
+  m_PrefabAsset: {fileID: 0}

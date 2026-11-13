@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b22b31fd4381e2843b67a7417f86ced6, type: 3}
+  m_Name: Silica
+  m_EditorClassIdentifier: RedEden.Crafting::RedEden.Crafting.RedEdenResourceDefinition
+  id: silica
+  displayName: Silica
+  description: Silicate-rich mineral suitable for glass feedstock.
+  type: 2
+  inventoryItem: {fileID: 11400000, guid: b30b9d566bd1cfd41869f5b39d872a18, type: 2}
+  purity: 0.86
+  contamination: 0.08
+  densityKilogramsPerCubicMeter: 2650
+  thermalResistance: 0.82
+  materialStrengthMegapascals: 50
+  harvestAmount: 1
+  extractionMethod: Mineral separator

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b22b31fd4381e2843b67a7417f86ced6, type: 3}
+  m_Name: CarbonaceousOre
+  m_EditorClassIdentifier: RedEden.Crafting::RedEden.Crafting.RedEdenResourceDefinition
+  id: carbonaceous_ore
+  displayName: Carbonaceous Ore
+  description: Carbon-bearing feedstock recovered from a protected deposit.
+  type: 4
+  inventoryItem: {fileID: 11400000, guid: cf5c040952460094ba620677f9756fef, type: 2}
+  purity: 0.61
+  contamination: 0.25
+  densityKilogramsPerCubicMeter: 2200
+  thermalResistance: 0.32
+  materialStrengthMegapascals: 15
+  harvestAmount: 1
+  extractionMethod: Sealed extractor

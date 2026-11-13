@@ -1,0 +1,23 @@
+{
+    "name": "RedEden.Crafting.EditModeTests",
+    "references": [
+        "RedEden.Crafting",
+        "GUID:7e11b191bda03244cab010a91ca9c4d9",
+        "GUID:12395da4a6225094787d545ddf532f99",
+        "GUID:907b3328f60158944b2faf1e1b0a7749"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "noEngineReferences": false
+}

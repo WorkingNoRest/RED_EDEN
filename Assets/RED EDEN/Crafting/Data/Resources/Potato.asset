@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b22b31fd4381e2843b67a7417f86ced6, type: 3}
+  m_Name: Potato
+  m_EditorClassIdentifier: RedEden.Crafting::RedEden.Crafting.RedEdenResourceDefinition
+  id: hydroponic-potato
+  displayName: Potato
+  description: Potatoes grown in the hydroponic farm.
+  type: 4
+  inventoryItem: {fileID: 11400000, guid: 6e10e495bc5843cc84cf91c594b1a580, type: 2}
+  purity: 1
+  contamination: 0
+  densityKilogramsPerCubicMeter: 0
+  thermalResistance: 0
+  materialStrengthMegapascals: 0
+  harvestAmount: 1
+  extractionMethod: Hydroponic cultivation

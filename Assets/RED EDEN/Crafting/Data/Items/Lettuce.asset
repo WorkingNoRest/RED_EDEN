@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e14be5e3e6cf2204293682bf65bce5dc, type: 3}
+  m_Name: Lettuce
+  m_EditorClassIdentifier: DevionGames.InventorySystem::DevionGames.InventorySystem.Item
+  m_Id: 547c2d13-627e-48d0-92fa-5df57d87732f
+  m_ItemName: Lettuce
+  m_UseItemNameAsDisplayName: 1
+  m_DisplayName: Lettuce
+  m_Icon: {fileID: 21300000, guid: 6e1a80d15efcccc43a16afd0b386f877, type: 3}
+  m_Prefab: {fileID: 8297019369115124264, guid: 8107f5d069fb74d4cb01bfb9521c9373, type: 3}
+  m_Description: Fresh lettuce grown in the hydroponic farm.
+  m_Category: {fileID: 0}
+  m_IsSellable: 0
+  m_BuyPrice: 0
+  m_CanBuyBack: 1
+  m_BuyCurrency: {fileID: 0}
+  m_SellPrice: 0
+  m_SellCurrency: {fileID: 0}
+  m_Stack: 1
+  m_MaxStack: 99
+  m_IsDroppable: 1
+  m_DropSound: {fileID: 0}
+  m_OverridePrefab: {fileID: 0}
+  m_IsCraftable: 0
+  m_CraftingDuration: 2
+  m_UseCraftingSkill: 0
+  m_SkillWindow: Skills
+  m_CraftingSkill: {fileID: 0}
+  m_RemoveIngredientsWhenFailed: 0
+  m_MinCraftingSkillValue: 0
+  m_CraftingAnimatorState: Blacksmithy
+  m_CraftingModifier:
+    modifiers: []
+  ingredients: []
+  properties: []

@@ -1,0 +1,17 @@
+{
+    "name": "RedEden.ARES",
+    "references": [
+        "Unity.InputSystem",
+        "GUID:bc341db340573d349b7e439dd3350736",
+        "com.whisper.unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

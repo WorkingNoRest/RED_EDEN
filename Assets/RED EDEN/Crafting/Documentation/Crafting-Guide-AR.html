@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>RED EDEN | دليل نظام التصنيع</title>
+<style>
+@page { size: A4; margin: 16mm 15mm 17mm; }
+@page {
+  @bottom-left { content: "RED EDEN  •  دليل نظام التصنيع"; color: #76909a; font-size: 8pt; }
+  @bottom-right { content: counter(page); color: #76909a; font-size: 8pt; }
+}
+* { box-sizing: border-box; }
+html { direction: rtl; }
+body {
+  margin: 0; color: #e8f0f2; background: #10191e;
+  font: 11pt/1.72 Arial, "Arabic Typesetting", sans-serif;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.page {
+  min-height: 255mm; page-break-after: always; break-after: page;
+  padding: 2mm 0 0;
+}
+.page:last-child { page-break-after: auto; break-after: auto; }
+.cover {
+  min-height: 257mm; padding: 22mm 15mm; overflow: hidden; position: relative;
+  background: linear-gradient(145deg,#14252d 0%,#10191e 58%,#4b251e 100%);
+  border: 1px solid #31515b; border-radius: 5mm;
+}
+.cover:before {
+  content: ""; position: absolute; width: 95mm; height: 95mm;
+  border: 1px solid rgba(104,217,221,.32); border-radius: 50%;
+  left: -26mm; top: 44mm; box-shadow: 0 0 0 13mm rgba(104,217,221,.04),0 0 0 27mm rgba(104,217,221,.035);
+}
+.cover-mark,.cover-copy { position: relative; z-index: 1; }
+.eyebrow { color: #ff916b; letter-spacing: 2px; font-size: 10pt; font-weight: bold; }
+h1 { margin: 26mm 0 5mm; color: #fff; font-size: 34pt; line-height: 1.28; }
+.cover h2 { margin: 0; color: #87e0df; font-size: 18pt; font-weight: normal; }
+.cover p { max-width: 130mm; margin-top: 15mm; color: #d3e2e5; font-size: 13pt; }
+.cover-meta { margin-top: 38mm; color: #aac0c5; font-size: 10pt; }
+.cover-chip { display: inline-block; padding: 2mm 5mm; margin: 0 0 3mm 2mm; border: 1px solid #496770; border-radius: 20px; color: #a8eeee; }
+h2 { color: #7fe0de; font-size: 21pt; margin: 0 0 4mm; line-height: 1.35; }
+h3 { color: #ff9a76; font-size: 14pt; margin: 6mm 0 2mm; }
+p { margin: 2mm 0 3mm; }
+ul,ol { margin: 2mm 0 4mm; padding-right: 7mm; }
+li { margin: 1mm 0; }
+.lead { color: #ccdcdf; font-size: 12pt; }
+.kicker { color: #ff9a76; font-size: 9pt; font-weight: bold; letter-spacing: 1px; }
+.rule { border: 0; border-top: 1px solid #35515a; margin: 5mm 0; }
+.card {
+  margin: 4mm 0; padding: 4mm 5mm; background: #17252b;
+  border: 1px solid #304851; border-right: 3px solid #49c9c8; border-radius: 2mm;
+}
+.warn { border-right-color: #ff956f; background: #2a211f; }
+.good { border-right-color: #69d6a5; }
+.small { color: #abc0c5; font-size: 9pt; }
+.tag { color: #83d8d7; font-weight: bold; }
+table { width: 100%; margin: 4mm 0; border-collapse: collapse; font-size: 9.5pt; }
+th { background: #20363e; color: #92e4e0; text-align: right; }
+th,td { border: 1px solid #38515a; padding: 2.2mm 2.5mm; vertical-align: top; }
+tr:nth-child(even) td { background: #152228; }
+.ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; text-align: left; }
+.code {
+  direction: ltr; unicode-bidi: isolate; text-align: left; display: block;
+  padding: 3mm 4mm; margin: 3mm 0; color: #b7eeea; background: #0c1418;
+  border: 1px solid #29444b; border-radius: 2mm;
+  font: 9.5pt/1.55 Consolas, "Courier New", monospace;
+}
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; position: relative; padding: 0 12mm 4mm 0; }
+.steps li:before {
+  content: counter(step); position: absolute; right: 0; top: 0;
+  width: 8mm; height: 8mm; text-align: center; line-height: 8mm;
+  border-radius: 50%; background: #21454d; color: #8fe6e2; font-weight: bold;
+}
+.grid { display: table; width: 100%; table-layout: fixed; border-spacing: 3mm; margin: 3mm -3mm; }
+.grid .cell { display: table-cell; width: 50%; vertical-align: top; }
+.pill { color: #ffd1bc; background: #39251f; padding: 0 2mm; border-radius: 2mm; }
+.toc li { margin: 2.2mm 0; }
+.closing { margin-top: 10mm; padding: 6mm; text-align: center; color: #a9c5c9; border-top: 1px solid #38515a; }
+</style>
+</head>
+<body>
+
+<section class="page cover">
+  <div class="cover-mark">
+    <span class="eyebrow">RED EDEN  /  MARTIAN INDUSTRIAL SYSTEMS</span>
+    <h1>دليل نظام<br>التصنيع والكرافتينج</h1>
+    <h2>كتالوج عملي للإعداد والاستخدام داخل Unity</h2>
+    <p>من جمع خامات المريخ إلى تشغيل الطابعة واستلام المنتج، مع شرح قواعد البيانات، المحطات، الحفظ، المؤثرات، واختبار النظام.</p>
+    <div class="cover-meta">
+      <span class="cover-chip">Unity 6</span>
+      <span class="cover-chip">كيبورد وماوس</span>
+      <span class="cover-chip">RED EDEN Crafting</span>
+      <p>نسخة الدليل: 1.0 &nbsp; | &nbsp; 4 نوفمبر 2026</p>
+      <p class="small">مرجع للاستخدام داخل المشروع الحالي. أسماء القوائم والحقول أدناه مطابقة للنظام الموجود، وقد تختلف بعض التفاصيل إذا عُدّلت الأصول لاحقًا.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page">
+  <div class="kicker">ابدأ من هنا</div>
+  <h2>كيف يعمل النظام؟</h2>
+  <p class="lead">نظام RED EDEN يضيف التصنيع وجمع الموارد فوق Inventory System الموجود؛ لا ينشئ مخزونًا بديلًا. الموارد والمنتجات كلها عناصر <span class="ltr">Item</span> مسجلة في قاعدة المخزون الحالية.</p>
+  <div class="card"><b>التدفق المختصر</b><br>اجمع الخام بـ <span class="ltr">E</span> ← أضف الموارد إلى المخزون ← افتح محطة التصنيع بـ <span class="ltr">E</span> ← اختر وصفة متاحة ← ابدأ الطباعة ← انتظر اكتمالها ← استلم الناتج إلى المخزون.</div>
+  <div class="grid">
+    <div class="cell card"><span class="tag">قاعدة المخزون</span><br>تحتفظ بكميات العناصر، وتظل المرجع الوحيد لكميات اللاعب.</div>
+    <div class="cell card"><span class="tag">قاعدة التصنيع</span><br>تربط وصفات التصنيع بتعريفات الموارد ومواد الناتج.</div>
+  </div>
+  <div class="grid">
+    <div class="cell card"><span class="tag">محطة التصنيع</span><br>تحتفظ بحالة التشغيل والوصفة النشطة والتقدم والناتج المنتظر.</div>
+    <div class="cell card"><span class="tag">عقدة المورد</span><br>تسلم كمية من مورد مسجل، مع حد للمخزون وإمكانية إعادة ظهور اختيارية.</div>
+  </div>
+  <h3>فهرس الدليل</h3>
+  <ol class="toc">
+    <li>تجهيز المشروع وقواعد البيانات</li>
+    <li>إعداد الطابعة ومحطة التصنيع</li>
+    <li>طريقة اللعب واستخدام واجهة التصنيع</li>
+    <li>الوصفات الافتراضية للخامات والمنتجات</li>
+    <li>إضافة مورد أو وصفة جديدة</li>
+    <li>جمع الموارد والعُقد والعناصر القابلة للاستكشاف</li>
+    <li>حفظ اللعبة واستعادة التصنيع</li>
+    <li>المؤثرات البصرية للطابعة</li>
+    <li>التحقق، الاختبارات، واستكشاف الأعطال</li>
+  </ol>
+  <div class="card warn"><b>مهم:</b> جمع المورد والطباعة يتطلبان نافذة مخزون فعالة اسمها الافتراضي <span class="ltr">Inventory</span>. إذا غُيّر الاسم في إعداد المحطة، يجب أن يطابق اسم الودجت الموجود فعلًا.</div>
+</section>
+
+<section class="page">
+  <div class="kicker">01 / الإعداد</div>
+  <h2>تجهيز المشروع في Unity</h2>
+  <ol class="steps">
+    <li>افتح المشروع وانتظر انتهاء تجميع السكربتات. يجب أن تظهر قائمة <span class="ltr">Tools &gt; RED EDEN &gt; Crafting</span> في محرر Unity.</li>
+    <li>شغّل <span class="ltr">Tools &gt; RED EDEN &gt; Crafting &gt; Create Starter Data</span>. ينشئ البيانات الناقصة ويجهز مراجع قاعدة البيانات وملفات موارد البداية. إذا كانت الأصول موجودة، لا يعيد إنشاء ملفات الموارد والوصفات الموجودة.</li>
+    <li>اختر <span class="ltr">InventoryManager</span> الموجود في المشهد، وأضف <span class="ltr">RED EDEN Item Database.asset</span> إلى قاعدة البيانات التابعة/الإضافية في إعداداته. احتفظ بقاعدة المخزون الأصلية.</li>
+    <li>تأكد من وجود اللاعب الذي يستخدم إعداد <span class="ltr">Player Tag</span> في إعدادات المخزون، ووجود نافذة <span class="ltr">ItemContainer</span> اسمها <span class="ltr">Inventory</span>.</li>
+    <li>أضف <span class="ltr">RED EDEN Crafting Database.asset</span> إلى كل محطة. إعداد المحطة الافتراضي <span class="ltr">Station Type = Fabricator</span>، ويجب أن يطابق وصفاتك.</li>
+    <li>أضف Collider إلى جسم الطابعة واضبط نطاق الاستخدام وفق إعداد <span class="ltr">Use Distance</span>. تفاعل اللاعب بالمحطات وعقد الموارد مضبوط على <span class="ltr">E</span>.</li>
+    <li>ضع عقد الموارد من ملفات Prefab الجاهزة أو أضف <span class="ltr">MartianResourceNode</span> إلى كائن المورد، ثم اربط تعريف المورد.</li>
+  </ol>
+  <h3>تسميات يجب أن تتطابق</h3>
+  <table>
+    <thead><tr><th>الموضع</th><th>القيمة المطلوبة</th><th>سببها</th></tr></thead>
+    <tbody>
+      <tr><td>محطة التصنيع</td><td><span class="ltr">Inventory Window</span></td><td>اسم نافذة المخزون التي تستخدمها المحطة للتأكد من المواد وخصمها وإضافة الناتج.</td></tr>
+      <tr><td>تعريف الوصفة</td><td><span class="ltr">Station Type</span></td><td>يحدد المحطات القادرة على عرض الوصفة وتصنيعها.</td></tr>
+      <tr><td>مدير المخزون</td><td>قاعدة عناصر RED EDEN مضافة دون استبدال القاعدة الأصلية</td><td>حتى يتعرف المخزون على تعريفات الموارد والمنتجات.</td></tr>
+    </tbody>
+  </table>
+  <div class="card warn">إذا لم يجد النظام مدير المخزون أو النافذة بالاسم المطلوب، فلن يبدأ الاستهلاك أو التسليم. راجع Console واسم النافذة بدل إنشاء InventoryManager ثانٍ.</div>
+</section>
+
+<section class="page">
+  <div class="kicker">02 / إعداد المحطة</div>
+  <h2>إعداد محطة طباعة موثوقة</h2>
+  <ol class="steps">
+    <li>أنشئ كائنًا للطابعة مع Collider مناسب لنطاق التفاعل، وأضف <span class="ltr">RedEdenCraftingStation</span>.</li>
+    <li>عيّن <span class="ltr">Database</span> إلى قاعدة بيانات RED EDEN، واختر <span class="ltr">Station Type</span> المطلوب.</li>
+    <li>اترك <span class="ltr">Inventory Window</span> = <span class="ltr">Inventory</span> ما لم تكن نافذة المشروع تحمل اسمًا آخر.</li>
+    <li>تأكد أن <span class="ltr">Operational</span> مفعّل وأن وصفة المنتج تحمل نوع محطة مطابقًا.</li>
+    <li>احفظ المشهد، ثم افحص معرف المحطة. يُنشأ معرف ثابت للمكوّن عند التحرير.</li>
+  </ol>
+  <h3>معرف ثابت لكل محطة</h3>
+  <p>المعرف يربط بيانات الحفظ بالطابعة نفسها. عند تكرار محطة في المشهد، حدّد النسخة الجديدة، ثم من قائمة المكوّن اختر <span class="ltr">Generate New Stable Station ID</span>. لا تترك نسختين بمعرف واحد: الحفظ قد يرفضه كي لا يكتب حالة محطة فوق أخرى.</p>
+  <div class="card good"><b>قاعدة عملية:</b> محطة واحدة = معرف واحد + قاعدة بيانات صالحة + نافذة مخزون صحيحة + Collider قابل للوصول.</div>
+  <h3>حالات المحطة</h3>
+  <table>
+    <thead><tr><th>الحالة</th><th>المعنى للاعب</th><th>ما الذي يحدث؟</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ltr">Idle</span></td><td>جاهزة للتصنيع</td><td>يمكن بدء وصفة عند توفر المواد.</td></tr>
+      <tr><td><span class="ltr">Crafting</span></td><td>قيد الطباعة</td><td>تستمر المهلة حتى عند إغلاق الواجهة.</td></tr>
+      <tr><td><span class="ltr">ReadyToCollect</span></td><td>الناتج جاهز</td><td>يظل الناتج معلقًا في المحطة حتى نجاح نقله.</td></tr>
+      <tr><td><span class="ltr">Disabled</span></td><td>المحطة غير مفعلة</td><td>لا تقبل التصنيع حتى إعادة تشغيلها.</td></tr>
+    </tbody>
+  </table>
+  <p class="small">حالة الاختيار والوظيفة والناتج محفوظة لكل محطة بشكل مستقل؛ تشغيل طابعة لا يغير عمل طابعة أخرى.</p>
+</section>
+
+<section class="page">
+  <div class="kicker">03 / تجربة اللعب</div>
+  <h2>من الاقتراب حتى تسلّم المنتج</h2>
+  <ol class="steps">
+    <li>اقترب من محطة أو عقدة ضمن نطاق استخدامها، ثم اضغط <span class="ltr">E</span>. عند المحطة تظهر واجهة خاصة بها.</li>
+    <li>راجع قائمة الوصفات. تظهر الوصفات المسجلة لنوع المحطة؛ الوصفة غير المتاحة بسبب غياب مواد أو مشكلة مخزون تكون باهتة وغير قابلة للاختيار.</li>
+    <li>اختر وصفة متاحة. تعرض التفاصيل اسم المنتج، الكمية المطلوبة والمتاحة لكل مورد، ناتج الطباعة، والوقت.</li>
+    <li>اضغط <span class="ltr">START PRINT</span>. تُفحص الوصفة والمخزون ثم تُخصم المواد مرة واحدة عند بدء المهمة. الضغط المتكرر لا يطلق وظيفة ثانية لأن المحطة تصبح مشغولة.</li>
+    <li>تابع حالة <span class="ltr">PRINTING</span> ونسبة التقدم والوقت المتبقي. يمكنك إغلاق الواجهة؛ الإغلاق لا يلغي المهمة.</li>
+    <li>بعد اكتمال الطباعة تظهر حالة <span class="ltr">OUTPUT READY</span>. إذا كانت الواجهة مفتوحة استخدم <span class="ltr">COLLECT OUTPUT</span> أو اضغط <span class="ltr">E</span>.</li>
+    <li>إذا كانت الواجهة مغلقة، الضغط الأول على <span class="ltr">E</span> يفتحها عند وجود الناتج؛ اجمعه بزر <span class="ltr">COLLECT OUTPUT</span> أو اضغط <span class="ltr">E</span> مرة أخرى.</li>
+  </ol>
+  <div class="card warn"><b>المخزون ممتلئ؟</b> تظهر رسالة فشل التسليم، لكن الناتج يظل في الطابعة. أفرغ مساحة ثم أعد محاولة الجمع.</div>
+  <div class="card"><b>كرر E؟</b> لا يؤدي الضغط المتكرر إلى مضاعفة الناتج. بعد نجاح التسليم تُزال نسخة الناتج المعلقة من المحطة، فلا توجد نسخة ثانية للجمع.</div>
+  <h3>ما الذي تعرضه واجهة التصنيع؟</h3>
+  <ul>
+    <li>عنوان الواجهة: <span class="ltr">RED EDEN / FABRICATOR</span>.</li>
+    <li>حالة الطباعة أو حالة الاستعداد أو رسالة اكتمال التصنيع.</li>
+    <li>تفاصيل الوصفة: المواد المتوفرة/المطلوبة، المنتج والكمية، ومدة التصنيع.</li>
+    <li>الأزرار: <span class="ltr">START PRINT</span> و<span class="ltr">COLLECT OUTPUT</span> و<span class="ltr">CLOSE</span>.</li>
+  </ul>
+</section>
+
+<section class="page">
+  <div class="kicker">04 / البيانات الافتراضية</div>
+  <h2>الوصفات الأربع المرفقة</h2>
+  <p>هذه القيم مأخوذة من أصول Recipe الحالية. جميعها تتطلب نوع محطة <span class="ltr">Fabricator</span>. لا توجد وصفة جاهزة لتحويل جليد الماء مباشرة إلى ماء أو غاز.</p>
+  <table>
+    <thead><tr><th>المنتج</th><th>المواد المطلوبة</th><th>الناتج</th><th>الوقت</th><th>ملاحظة</th></tr></thead>
+    <tbody>
+      <tr><td>Compacted Regolith Brick</td><td>3 Regolith</td><td>3 طوب</td><td>3 ثوانٍ</td><td>تصنيع أولي لمواد البناء.</td></tr>
+      <tr><td>Metal Plate</td><td>2 Ferric Ore<br>1 Carbonaceous Ore</td><td>1 لوح</td><td>6 ثوانٍ</td><td>يستهلك خامين مختلفين.</td></tr>
+      <tr><td>Silicate Glass</td><td>2 Silica</td><td>1 زجاج</td><td>5 ثوانٍ</td><td>يحتاج خام السيليكا.</td></tr>
+      <tr><td>Electrical Cable</td><td>2 Copper Ore<br>1 Carbonaceous Ore</td><td>2 كابل</td><td>4 ثوانٍ</td><td>ناتج مكدس بكمية 2.</td></tr>
+    </tbody>
+  </table>
+  <h3>مورد بداية: المصدر والاستخدام</h3>
+  <table>
+    <thead><tr><th>المورد</th><th>نوعه في قاعدة RED EDEN</th><th>طريقة الاستخراج المسجلة</th><th>الوصفات التي تستخدمه</th></tr></thead>
+    <tbody>
+      <tr><td>Regolith</td><td>Regolith</td><td>Scoop or sieve</td><td>Compacted Regolith Brick</td></tr>
+      <tr><td>Water Ice</td><td>Ice</td><td>Thermal extraction</td><td>لا تستخدمه وصفات الطابعة الحالية</td></tr>
+      <tr><td>Ferric Ore</td><td>Metal Ore</td><td>Rock breaker</td><td>Metal Plate</td></tr>
+      <tr><td>Silica</td><td>Mineral</td><td>Mineral separator</td><td>Silicate Glass</td></tr>
+      <tr><td>Carbonaceous Ore</td><td>Organic</td><td>Sealed extractor</td><td>Metal Plate وElectrical Cable</td></tr>
+      <tr><td>Copper Ore</td><td>Metal Ore</td><td>Mineral separator</td><td>Electrical Cable</td></tr>
+    </tbody>
+  </table>
+  <div class="card">تعريف المورد يحتفظ ببيانات مثل النقاء والتلوث والكثافة والمقاومة الحرارية وقوة المادة. هذه بيانات تعريفية؛ الجودة الخاصة بكل دفعة مكرسة أو كل قطعة مخزون ليست ممثلة حاليًا كحالة مستقلة.</div>
+</section>
+
+<section class="page">
+  <div class="kicker">05 / توسيع قاعدة التصنيع</div>
+  <h2>إضافة مورد أو وصفة جديدة</h2>
+  <h3>إضافة عنصر مخزون ومورد</h3>
+  <ol class="steps">
+    <li>أنشئ عنصر <span class="ltr">Item</span> في قاعدة عناصر المشروع، وحدد الاسم وخصائص التكديس.</li>
+    <li>من القائمة <span class="ltr">Assets &gt; Create &gt; RED EDEN &gt; Crafting &gt; Resource Definition</span> أنشئ تعريفًا، ثم عيّن <span class="ltr">ID</span> فريدًا واسم العرض والوصف والنوع وعنصر المخزون.</li>
+    <li>اضبط بيانات المورد الاختيارية: <span class="ltr">Purity</span> و<span class="ltr">Contamination</span> والكثافة والمقاومة الحرارية وقوة المادة وطريقة الاستخراج و<span class="ltr">Harvest Amount</span>.</li>
+    <li>أضف تعريف المورد إلى مصفوفة <span class="ltr">Resources</span> في قاعدة <span class="ltr">RED EDEN Crafting Database</span>، وعنصره إلى قاعدة المخزون التابعة في <span class="ltr">InventoryManager</span>.</li>
+    <li>أنشئ عقدة/Prefab للمورد واربط تعريف المورد. شغّل إنشاء بيانات البداية إذا كنت تريد إنشاء/إصلاح Prefab المورد الافتراضي باسمه.</li>
+  </ol>
+  <h3>إنشاء وصفة</h3>
+  <ol class="steps">
+    <li>أنشئ أصل <span class="ltr">RED EDEN &gt; Crafting &gt; Recipe</span>.</li>
+    <li>حدد معرّفًا ثابتًا وفريدًا، اسم العرض والوصف، نوع المحطة، ومدة أكبر من صفر.</li>
+    <li>أضف مكونًا واحدًا أو أكثر؛ لكل مكوّن اختر موردًا مسجلًا في قاعدة المحطة وحدد كمية موجبة.</li>
+    <li>اختر <span class="ltr">Output Item</span> مسجلًا في قاعدة المخزون، ثم حدد <span class="ltr">Output Amount</span> موجبًا.</li>
+    <li>أضف الوصفة إلى مصفوفة <span class="ltr">Recipes</span> في قاعدة التصنيع. احفظ الأصول ثم شغّل التحقق.</li>
+  </ol>
+  <div class="code">Tools &gt; RED EDEN &gt; Crafting &gt; Validate Crafting Data</div>
+  <div class="card warn">لا تستخدم أسماء مكررة كمعرفات. يجب أن تكون معرفات الموارد والعناصر والوصفات ثابتة بعد بدء استخدام الحفظ؛ تغيير ID لاحقًا يمنع مطابقة البيانات المحفوظة القديمة وقد يتطلب ترحيلًا.</div>
+</section>
+
+<section class="page">
+  <div class="kicker">06 / جمع الموارد</div>
+  <h2>إعداد عقدة مورد قابلة للحصاد</h2>
+  <p>المكوّن <span class="ltr">MartianResourceNode</span> يرث من Trigger الموجود في Inventory System. يضيف المورد إلى المخزون أولًا، ثم يخفض كمية العقدة؛ إذا تعذر إدخال الكمية بسبب امتلاء المخزون، لا تُستنزف العقدة.</p>
+  <table>
+    <thead><tr><th>الحقل</th><th>وظيفته</th><th>القيمة الافتراضية</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ltr">Resource</span></td><td>تعريف المورد وعنصر المخزون الذي سيُمنح.</td><td>يجب تعيينه.</td></tr>
+      <tr><td><span class="ltr">Remaining Amount</span></td><td>كمية المخزون الكلية في العقدة.</td><td>10</td></tr>
+      <tr><td><span class="ltr">Amount Per Use</span></td><td>كمية كل تفاعل ناجح، حتى حد الكمية المتبقية.</td><td>1</td></tr>
+      <tr><td><span class="ltr">Inventory Window</span></td><td>اسم نافذة المخزون المستهدفة.</td><td>Inventory</td></tr>
+      <tr><td><span class="ltr">Supports Respawn</span></td><td>السماح بعودة العقدة بعد استنزافها.</td><td>غير مفعّل.</td></tr>
+      <tr><td><span class="ltr">Respawn Delay Seconds</span></td><td>زمن الانتظار قبل إعادة ملء العقدة.</td><td>300 ثانية.</td></tr>
+    </tbody>
+  </table>
+  <h3>خطوات العالم والـPrefabs</h3>
+  <ul>
+    <li>للبداية استخدم ملفًا داخل <span class="ltr">Assets/RED EDEN/Crafting/Data/Prefabs/ResourceNodes</span>.</li>
+    <li>اسحب الـPrefab إلى المشهد، اضبط حجمه ومظهره وCollider ونطاق التفاعل، واترك المكوّن مرتبطًا بتعريف المورد الصحيح.</li>
+    <li>كل عقدة في العالم تحتاج <span class="ltr">Stable Node ID</span> مستقلًا. بعد نسخ العقدة، استخدم <span class="ltr">Generate New Stable Node ID</span> من قائمة المكوّن على النسخة.</li>
+    <li>عند نفاد الكمية، تُعطّل المرئيات والـColliders الخاصة بالعقدة، ولا يُعطّل جذرها أو يختفي المكوّن المسؤول عن الحفظ.</li>
+  </ul>
+  <div class="card warn"><b>إعادة الظهور:</b> العداد يتقدم باستخدام وقت اللعب <span class="ltr">Time.deltaTime</span>. لا تُحتسب ساعات غياب اللاعب عن اللعبة؛ لا يوجد عداد زمني خارج اللعبة في التنفيذ الحالي.</div>
+</section>
+
+<section class="page">
+  <div class="kicker">07 / الحفظ والاستعادة</div>
+  <h2>ما الذي يُحفظ، وكيف تعيد الاختبار؟</h2>
+  <p>بيانات RED EDEN تُسجّل في JSON حفظ المشهد ضمن مسار الحفظ الموجود في <span class="ltr">InventoryManager</span>. لا يوجد نظام حفظ مستقل للمخزون أو للكرافتينج.</p>
+  <div class="grid">
+    <div class="cell card"><b>حالة الطابعة</b><br>معرّف المحطة، حالة التشغيل، ID الوصفة، الزمن المتبقي والمدة والتقدم، ID الناتج وكميته، وحالة جمعه.</div>
+    <div class="cell card"><b>حالة عقدة المورد</b><br>معرّف العقدة والمورد، الكمية المتبقية، الاستنزاف، إعداد إعادة الظهور والوقت المتبقي.</div>
+  </div>
+  <ol class="steps">
+    <li>تأكد من تفعيل إعدادات حفظ المخزون الحالية واستخدم إجراء الحفظ المعتاد للمشروع.</li>
+    <li>احفظ أثناء مهمة نشطة للتحقق من تسجيل ID الوصفة والوقت المتبقي. مواد الوصفة سبق خصمها؛ الاستعادة لا تخصمها مرة ثانية.</li>
+    <li>احفظ بعد اكتمال الطباعة وقبل الجمع للتحقق من بقاء الناتج المعلّق في محطته.</li>
+    <li>استعد الحفظ عبر نظام المشروع المعتاد، مع وجود المحطات والعقد ذات المعرفات نفسها في المشهد وقواعد التعريفات متاحة.</li>
+    <li>قارن كميات المخزون بحفظ Inventory System، وتأكد أن حفظ الطابعة لم يضف نسخة أخرى لعناصر المخزون.</li>
+  </ol>
+  <h3>شروط وحدود مهمة</h3>
+  <ul>
+    <li>الحفظ يحتاج معرفات فريدة لكل محطة وعقدة. المعرف المكرر أو المفقود يؤدي إلى تحذير/رفض حفظ بيانات المشهد لمنع الكتابة فوق حالة أخرى.</li>
+    <li>الوصفة والمنتج والمورد يستعادون عبر IDs من قاعدة البيانات، لا عبر حفظ مرجع Unity وحده. عند غياب تعريف محفوظ، يسجل النظام تحذيرًا ويحتفظ بمعلومات ID القابلة للاسترداد.</li>
+    <li>مخزون اللاعب محفوظ في مساره الأصلي فقط. لا تعِد إنشاء عنصر في المخزون بسبب وجود ناتج محفوظ بالمحطة؛ الناتج محطة وليس عنصرًا مملوكًا بعد.</li>
+    <li>تعطل تسلسل بيانات المشهد يوقف تحديث الحفظ بدل استبدال البيانات السابقة بنجاح زائف.</li>
+    <li>نسخة بيانات المكوّن الحالية هي Schema Version 1؛ ترقية الصيغة مستقبلًا تتطلب دعم قراءة الإصدارات السابقة.</li>
+  </ul>
+</section>
+
+<section class="page">
+  <div class="kicker">08 / الشكل والحركة</div>
+  <h2>إعداد مؤثرات الطابعة الإجرائية</h2>
+  <p>أضف <span class="ltr">RedEdenPrinterVisuals</span> إلى جذر الطابعة. إذا لم تُسند أنظمة الجسيمات أو ضوء التصنيع، ينشئ المكوّن مؤثرات بسيطة وقت التشغيل دون أصول مدفوعة.</p>
+  <table>
+    <thead><tr><th>المجموعة</th><th>ما الذي تربطه؟</th><th>السلوك</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ltr">Station</span></td><td>المحطة وجذر المؤثرات.</td><td>يقرأ حالة المحطة ليحدد مستوى الحركة والضوء.</td></tr>
+      <tr><td><span class="ltr">Printer Motion</span></td><td>أجزاء فرعية متحركة ومتمددة، إزاحة الحركة والمنحنى والسرعة.</td><td>حركة وتوسع/انكماش للأجزاء عند التصنيع.</td></tr>
+      <tr><td><span class="ltr">Fabrication Effects</span></td><td>غبار مضيء، نجوم، دوامة، جذر الشكل الظلي ومنحنى ظهوره.</td><td>جسيمات تصنيع وكشف تدريجي للشكل وإشارة اكتمال.</td></tr>
+      <tr><td><span class="ltr">Emission and Lighting</span></td><td>Renderers الانبعاث، الألوان، والضوء والشدة.</td><td>إضاءة متغيرة في العمل وإشارة مختلفة عند الجاهزية.</td></tr>
+    </tbody>
+  </table>
+  <h3>توصيلات آمنة</h3>
+  <ul>
+    <li>استخدم كائنات فرعية مرئية كـ<span class="ltr">Moving Parts</span> و<span class="ltr">Expanding Parts</span>؛ لا تسند جذر المحطة.</li>
+    <li>لا تسند أي Transform يحتوي Collider. المكوّن يتجاوز تحريكه ويصدر تحذيرًا إذا كان Collider موجودًا تحته.</li>
+    <li>ضع المؤثرات والجسيمات على أبناء منفصلين عند منطقة الطباعة، مع ضبط مواقعها محليًا لتناسب نموذجك.</li>
+    <li>اختبر الألوان والخامات والإضاءة في URP وإعدادات المنصة المستهدفة، واضبط المنحنيات والسرعة من Inspector.</li>
+  </ul>
+  <div class="card">المؤثرات تشمل الغبار اللامع والنجوم والجسيمات الدوامة، ظهور شكل المنتج تدريجيًا، حركة أجزاء الماكينة، انبعاثًا/إضاءة متحركة، وانفجارًا ضوئيًا مميزًا عند اكتمال الطباعة.</div>
+</section>
+
+<section class="page">
+  <div class="kicker">09 / التحقق وضمان الجودة</div>
+  <h2>فحص البيانات والاختبارات</h2>
+  <h3>مدقق أصول RED EDEN</h3>
+  <div class="code">Tools &gt; RED EDEN &gt; Crafting &gt; Validate Crafting Data</div>
+  <p>يفحص المدقق تعريفات الموارد ومعرفاتها وعناصرها، الوصفات والمكونات، وجود الموارد في قاعدة التصنيع، وملفات Prefab الموارد المرتبطة. كما توجد اختبارات Edit Mode تفحص مراجع GUID داخل بيانات crafting.</p>
+  <h3>اختبارات Unity المسجلة في المشروع</h3>
+  <table>
+    <thead><tr><th>المجموعة</th><th>النتيجة التي تحققت</th><th>ما لا تثبته وحدها</th></tr></thead>
+    <tbody>
+      <tr><td>Play Mode — 6 اختبارات</td><td>حفظ/استعادة وظائف محطات مستقلة وعقدة؛ حفظ آمن عند فشل التسلسل؛ وصفة/ناتج مفقود؛ عد تنازلي واكتمال؛ ضغط E وفتح واجهة المحطة.</td><td>الاقتراب الفيزيائي في مشهد مهيأ، والخصم/التسليم الفعلي عبر UI اللاعب الإنتاجي.</td></tr>
+      <tr><td>Edit Mode — 6 اختبارات</td><td>تحقق قاعدة البيانات والعناصر والوصفات وPrefab resource، مراجع GUID، عزل حالة المحطات، ورفض وصفة بلا ناتج.</td><td>تجربة إدخال لاعب حقيقية أو حفظ مشروع إنتاجي كامل.</td></tr>
+      <tr><td>مدقق Crafting Data</td><td>نجح على بيانات المشروع الحالية: 6 موارد و4 وصفات.</td><td>لا يحل محل تجربة مشهد لعب بإعدادات InventoryManager الفعلية.</td></tr>
+    </tbody>
+  </table>
+  <h3>اختبار يدوي مقترح قبل النشر</h3>
+  <ol>
+    <li>اجمع موردًا، ثم ابدأ وصفة بكمية صحيحة وتأكد من الخصم مرة واحدة.</li>
+    <li>جرب وصفة بلا خام كافٍ، ومخزونًا ممتلئًا، والنقر المتكرر على زر التصنيع.</li>
+    <li>أغلق واجهة محطة أثناء العمل وافتح محطة ثانية؛ تحقق من استقلال التقدم.</li>
+    <li>اجعل المخزون ممتلئًا عند الجمع، ثم أفرغ خانة وأعد الجمع؛ تحقق من عدم فقد أو تكرار الناتج.</li>
+    <li>احفظ أثناء تصنيع، وبعد الجاهزية، وبعد استنزاف عقدة؛ استعد الحفظ وافحص الأعداد والمعرفات.</li>
+  </ol>
+</section>
+
+<section class="page">
+  <div class="kicker">10 / دليل سريع</div>
+  <h2>حل المشكلات الشائعة</h2>
+  <table>
+    <thead><tr><th>العرض</th><th>السبب المحتمل</th><th>الإجراء</th></tr></thead>
+    <tbody>
+      <tr><td>لا تفتح المحطة بزر E</td><td>خارج النطاق، لا يوجد Player مطابق للوسم، أو Collider/إعداد Trigger غير صحيح.</td><td>تحقق من Player Tag وUse Distance وCollider، ثم جرّب داخل Play Mode.</td></tr>
+      <tr><td>رسالة Inventory غير موجود</td><td>لا يوجد InventoryManager نشط أو لا توجد نافذة ItemContainer بالاسم المتوقع.</td><td>أبقِ مدير المخزون الأصلي في المشهد، وراجع اسم الودجت وحقل Inventory Window.</td></tr>
+      <tr><td>الوصفة باهتة ولا يمكن اختيارها</td><td>المواد ناقصة أو العنصر غير معروف أو المحطة مشغولة/غير مفعلة.</td><td>راجع الأعداد في تفاصيل الوصفة وConsole ونوع المحطة وقاعدة العناصر.</td></tr>
+      <tr><td>المنتج جاهز لكن لا يُجمع</td><td>المخزون ممتلئ، لا توجد نافذة مخزون، أو تعريف عنصر الناتج مفقود.</td><td>أفرغ مساحة، أصلح ربط العنصر، ثم أعد الجمع؛ لا تحذف الطابعة والناتج معلق.</td></tr>
+      <tr><td>البيانات لا تعود بعد التحميل</td><td>المشهد لم يُحفظ عبر مسار Inventory System، ID تغيّر، أو تعريف الوصفة/المورد غير موجود.</td><td>استخدم مسار الحفظ المعتاد، وثبت IDs وافحص تحذيرات استعادة البيانات.</td></tr>
+      <tr><td>رسالة معرف مكرر</td><td>نسخت محطة أو عقدة دون تغيير معرف النسخة.</td><td>ولّد Stable ID جديدًا لكل نسخة واحفظ المشهد من جديد.</td></tr>
+      <tr><td>المورد لا يظهر في وصفة جديدة</td><td>تعريف المورد لم يُضف إلى قائمة قاعدة Crafting أو أن التغييرات لم تُحفظ.</td><td>أضفه إلى Resources في قاعدة المحطة، احفظ، ثم شغّل Validate Crafting Data.</td></tr>
+      <tr><td>تغير شكل الطابعة أو تصادمها أثناء الحركة</td><td>تم ربط الجذر أو Transform يحوي Collider إلى قائمة التحريك.</td><td>أزل ذلك الربط واستخدم Mesh فرعيًا بلا Collider.</td></tr>
+    </tbody>
+  </table>
+  <h3>المسارات الأساسية داخل المشروع</h3>
+  <ul>
+    <li><span class="ltr">Assets/RED EDEN/Crafting/Data/RED EDEN Crafting Database.asset</span></li>
+    <li><span class="ltr">Assets/RED EDEN/Crafting/Data/RED EDEN Item Database.asset</span></li>
+    <li><span class="ltr">Assets/RED EDEN/Crafting/Data/Resources</span> و<span class="ltr">Recipes</span> و<span class="ltr">Prefabs/ResourceNodes</span></li>
+    <li><span class="ltr">Assets/RED EDEN/Crafting/Runtime</span> لسكربتات المحطة والعقدة والواجهة والمؤثرات.</li>
+  </ul>
+  <div class="closing">جاهز للاستخدام على سطح المريخ — اجمع بذكاء، اطبع بأمان، ولا تترك الناتج في الطابعة.</div>
+</section>
+
+</body>
+</html>

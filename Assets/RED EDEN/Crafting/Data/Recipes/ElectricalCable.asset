@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9152f3a34e1b1249bf9cfdbb7d02a0a, type: 3}
+  m_Name: ElectricalCable
+  m_EditorClassIdentifier: RedEden.Crafting::RedEden.Crafting.RedEdenCraftingRecipe
+  id: electrical_cable
+  displayName: Electrical Cable
+  description: Fabricated from locally recovered Martian materials.
+  stationType: Fabricator
+  durationSeconds: 4
+  ingredients:
+  - resource: {fileID: 11400000, guid: 7a72c329fdbe1614b9848be39cc66e38, type: 2}
+    amount: 2
+  - resource: {fileID: 11400000, guid: 33d8c77d7523f5b4da8364e68b0c8337, type: 2}
+    amount: 1
+  outputItem: {fileID: 11400000, guid: 35b541dc46315924a9a7232b60264baf, type: 2}
+  outputAmount: 2
