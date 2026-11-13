@@ -45,6 +45,20 @@ namespace RedEden.ARES
             return builder.ToString();
         }
 
+        public static string GetPlayerStatusSummary()
+        {
+            StringBuilder builder = new StringBuilder();
+            AppendVitals(builder);
+            return builder.ToString();
+        }
+
+        public static string GetMissionStatusSummary()
+        {
+            StringBuilder builder = new StringBuilder();
+            AppendMissionStatus(builder);
+            return builder.ToString();
+        }
+
         private static void AppendInventory(StringBuilder builder)
         {
             builder.AppendLine("INVENTORY");

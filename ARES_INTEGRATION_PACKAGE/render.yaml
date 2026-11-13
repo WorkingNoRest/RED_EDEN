@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ares-gemini-live
+    runtime: python
+    plan: free
+    rootDir: ARES_INTEGRATION_PACKAGE/Backend
+    buildCommand: python -m pip install -r requirements.txt
+    startCommand: python -m uvicorn Source.ares_gemini_server:app --host 0.0.0.0 --port $PORT --workers 1 --ws-max-size 16384
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ARES_SESSION_SIGNING_KEY
+        generateValue: true
+      - key: ARES_RATE_LIMIT_STORAGE_URI
+        value: memory://

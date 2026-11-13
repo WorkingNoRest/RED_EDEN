@@ -1,4 +1,6 @@
-# ARES installation guide
+# ARES Gemini Live installation guide
+
+ARES provides native, full-duplex Gemini Live voice. It streams PCM over an authenticated WebSocket; it does not use HTTP text generation as a voice substitute. The Gemini API key stays in the backend.
 
 ## 1. Prerequisites
 
@@ -10,22 +12,33 @@
   https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
   ```
 
+- A Google Gemini Developer API key with Live API access to `gemini-3.8-live`. Documentation lists the model as stable, but each Google project must be checked with its own API key.
+- A desktop or mobile Unity target that supports `System.Net.WebSockets.ClientWebSocket`. This implementation does not support WebGL.
+
 ## 2. Copy the Unity files
 
 1. Back up `Assets/RED EDEN/ARES` if it already exists.
 2. Copy the `Unity/Assets/RED EDEN/ARES` folder and its adjacent `Unity/Assets/RED EDEN/ARES.meta` file into the project's `Assets/RED EDEN/` folder. Preserve the folder structure and every nested `.meta` file. Do not copy only the `.cs` files.
 3. Wait for Unity to finish importing and compiling. Resolve missing package/assembly references before continuing.
-4. In the Project window, choose **Create > RED EDEN > ARES > Gemini Live Configuration**.
-5. Set **Backend Base Url** to the backend origin, for example `http://localhost:8000` during local testing. Use `https://` for any non-loopback host.
-6. On the scene's existing ARES controller, assign the new asset to **Gemini Live Client**. Keep the local bridge assigned if it is used as the offline fallback.
-7. Keep the NASA archive/RAG configuration assigned; ARES does not send a Gemini request when the local archive has no supporting records.
+4. On the scene's existing ARES controller object, add/assign:
+   - `ARESController`: assign the `ARESGeminiLiveClient`, game settings/vitals providers as applicable, and `ARESMicrophoneVoiceInput` as the voice input provider.
+   - `ARESGeminiLiveClient`: assign an `ARES Gemini Live Configuration` asset.
+   - `ARESMicrophoneVoiceInput`: use the existing component; it now streams microphone PCM for Live and retains offline capture for the local path.
+   - `ARESAudioPlayer`: add it to the same object as `ARESGeminiLiveClient` or another active object; assign it to the client's **Audio Output Provider** field.
+   - `ARESFunctionCallHandler`: add it to the client object and assign it to **Function Call Handler**. It only returns read-only summaries.
+   - `ARESInterfaceController`: add it to an active object and assign the Live client to display connection/listening/speaking/error status.
+5. In **Create > RED EDEN > ARES > Gemini Live Configuration**, set **Backend Base Url** to `http://localhost:8000` for local testing, or the Render service origin (for example `https://ares-gemini-live.onrender.com`). Use HTTPS for every non-loopback host.
+6. On the controller, assign the Live client and microphone provider. The Live path uses **hold V to speak** and release to end the activity. Press V while ARES speaks to interrupt. The old text test panel is disabled when Live is configured.
+7. Keep existing local Ollama/offline components assigned if they are used when Gemini Live is not configured. Live speech does not require the offline Whisper recognizer to be ready.
 
-## 3. Configure and run the backend (Windows PowerShell)
+The four Live tools read current vitals, inventory, crafting, and mission status. Mission data is explicitly unavailable until a mission provider is exposed. Existing `ARESVitalsMonitor` and local alerts remain in place; no additional monitor or alert framework is required.
 
-From the package's `Backend` directory (open that folder in PowerShell first):
+## 3. Run the backend locally (Windows PowerShell)
+
+Open PowerShell in `ARES_INTEGRATION_PACKAGE\Backend`:
 
 ```powershell
-py -3 -m venv .venv
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
@@ -38,38 +51,62 @@ Open `.env` in a local editor and set:
 ```dotenv
 GEMINI_API_KEY=your_real_gemini_api_key
 ARES_SESSION_SIGNING_KEY=paste_the_random_value_generated_above
-GEMINI_MODEL=gemini-3.8-live
 ARES_RATE_LIMIT_STORAGE_URI=memory://
 ```
 
-Never paste either key into Unity, a `.asset`, a build, a command-line argument, or Git. `.env` is ignored by Git. Run the development service on loopback:
+Keep both secrets in the backend environment only. `.env` is ignored by Git. Run the development service on loopback:
 
 ```powershell
-uvicorn Source.ares_gemini_server:app --host 127.0.0.1 --port 8000
+python -m uvicorn Source.ares_gemini_server:app --host 127.0.0.1 --port 8000 --ws-max-size 16384
 ```
 
-Check `http://127.0.0.1:8000/health`, then run the Unity scene. For a remote service, use a domain with HTTPS and a maintained reverse proxy/API gateway; do not bind Uvicorn directly to a public interface. Configure gateway request-size and rate limits. The in-memory limiter is for a single development worker only.
+Check `http://127.0.0.1:8000/health`, then run the Unity scene. For backend tests, install test-only requirements and run:
 
-## 4. Authentication behavior and limits
+```powershell
+python -m pip install -r requirements-test.txt
+python -m compileall -q Source Tests
+python -m unittest discover -s Tests -v
+```
 
-The Unity client calls `POST /api/ares/session` to obtain a server-signed bearer token, then sends it to `POST /api/ares/chat`. Tokens expire in five minutes. The service rejects missing, tampered, or expired tokens. A session is anonymous: because a distributed Unity client cannot keep a static secret, anyone who can reach the public session endpoint can request a session. The included per-IP rate limits and bounded request fields are abuse controls, not player identity verification. Integrate your game's account/provider ID token verification before enabling broad public access or per-player billing.
+The Unity live endpoint is `/api/ares/live`. It receives a bearer token in the WebSocket handshake. Unity streams 16 kHz, mono, signed PCM16 little-endian binary audio frames, plus small JSON activity/tool messages. The backend forwards Gemini's 24 kHz PCM output as binary frames and transcription/status/tool events as JSON. No audio is stored by this service.
 
-The default limits are five session creations and twelve chat calls per IP per minute. Shared/public deployments must use gateway limits or configure a shared SlowAPI storage backend; per-process memory limits do not coordinate across workers.
+## 4. Deploy a Render Free test service
 
-## 5. Production checklist
+1. Push the package branch to a Git provider connected to Render.
+2. In Render, choose **New > Blueprint** and select the repository. During Blueprint setup, set the Blueprint file path to `ARES_INTEGRATION_PACKAGE/render.yaml`.
+3. Review the service: `render.yaml` selects a single-instance Free web service with the backend directory as its root, a `/health` check, and the required WebSocket message-size limit.
+4. Set `GEMINI_API_KEY` as a secret environment variable in Render. The Blueprint generates `ARES_SESSION_SIGNING_KEY`; do not replace it with a committed value.
+5. Deploy and copy the service origin (for example, `https://ares-gemini-live.onrender.com`) into the Unity Live configuration asset. Do not add a trailing path or API key.
+6. Wait for the service to finish its first deploy before opening the Unity scene.
 
-- [ ] Use HTTPS outside loopback and verify the certificate.
+Render supports inbound WebSockets and terminates TLS for public traffic. The included Free plan is for testing only: a Free web service can spin down after 15 minutes without inbound traffic, take about a minute to wake, consume up to the workspace's included monthly hours, and restart during platform maintenance/deploys. The Unity heartbeat keeps an active Live connection from going idle, but does not prevent service restarts. A disconnect ends the current conversation; reconnecting creates a new session. Use a paid service for production.
+
+The in-memory session limiter, per-IP WebSocket attempt limiter, and concurrent-session counter are process-local. Run one worker for this configuration. Multiple workers/instances require a shared gateway or equivalent distributed rate/concurrency control; `ARES_RATE_LIMIT_STORAGE_URI` configures only the HTTP session-creation limiter.
+
+## 5. Authentication and request limits
+
+- Unity obtains a server-signed bearer session from `POST /api/ares/session`. Tokens expire in five minutes and are not permanent client secrets.
+- The session is anonymous. Anyone who can reach the public session endpoint can request a session; a modified client can also extract and replay a live token until it expires. This does **not** make the token a secure secret or prove player identity.
+- The Gemini API key is used only by the backend on the upstream TLS WebSocket. The upstream URL does not contain the key; Unity never receives it.
+- The service limits session creation to five requests per IP/minute; Live WebSocket handshakes to six attempts per IP/minute; concurrent Live sessions to two per IP and sixteen per process; incoming client messages to 3,600/minute; audio chunks to 3,200 bytes; and JSON control messages to 16 KiB.
+- These are baseline abuse controls, not authorization or a substitute for account identity, shared gateway limits, monitoring, and spend controls. Verify your game's platform-issued identity token before allowing broad public access or per-player billing.
+
+## 6. Production checklist
+
+- [ ] Use HTTPS/WSS outside loopback and verify certificates.
 - [ ] Store Gemini and signing keys in the host's secret manager/environment, not in this package.
-- [ ] Use platform identity verification if only authenticated players may use ARES.
-- [ ] Apply shared rate limits, request-body limits, and monitoring at the gateway.
-- [ ] Keep Uvicorn private behind the proxy; restrict inbound network access.
-- [ ] Rotate the signing key if it is exposed; existing sessions will become invalid.
-- [ ] Confirm no secret is present in Unity assets, build output, or Git history.
+- [ ] Add platform identity verification and enforce per-player quotas before public launch.
+- [ ] Apply shared rate/concurrency limits and WebSocket timeouts at the gateway.
+- [ ] Use a paid, restart-aware deployment for production; test reconnection behavior.
+- [ ] Keep Uvicorn behind the platform/reverse proxy and set a bounded WebSocket message size.
+- [ ] Ensure user consent/privacy disclosures cover voice audio sent to Google.
+- [ ] Confirm no credential exists in Unity assets, build output, or Git-tracked files.
 
 ## Troubleshooting
 
 - `503 Backend session authentication is not configured`: set `ARES_SESSION_SIGNING_KEY` to a random value of at least 32 bytes and restart.
-- `401 A valid session token is required`: the client/backend versions are mismatched, or the token expired; update both package sides and retry.
-- `413 Request body is too large` or `422`: reduce prompt or game context size.
-- `429`: wait for the per-IP limit window to reset or tune limits at the gateway.
-- `502 Gemini request failed`: inspect backend logs for the upstream failure; the client-facing response intentionally avoids returning exception details.
+- `401` / WebSocket policy close: the session token is missing, invalid, or expired; reconnect to request a new one.
+- `1013` / capacity message: the per-IP/process Live limit or handshake rate limit was reached; wait and retry.
+- `Gemini Live is unavailable or not enabled for this API project`: verify the backend API key, billing/project configuration, and Live API access for that Google project. Account entitlement is not inferred from documentation alone.
+- No microphone/audio: confirm the microphone provider implements streaming, the client has an `ARESAudioPlayer` assigned, microphone permissions are granted, and the target supports `ClientWebSocket`.
+- Unity Live does not compile: check the Unity Input System, `com.whisper.unity`, RED EDEN/Devion references, and the target's .NET API compatibility.

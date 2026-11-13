@@ -45,6 +45,13 @@ namespace RedEden.ARES
         void CancelCapture();
     }
 
+    public interface IARESStreamingVoiceInput
+    {
+        bool IsStreaming { get; }
+        void BeginPcmStream(Action<byte[]> onPcm, Action<string> onError);
+        void EndPcmStream();
+    }
+
     public enum ARESVoiceState
     {
         Idle,
@@ -61,6 +68,22 @@ namespace RedEden.ARES
     public interface IARESVoiceOutput
     {
         void Speak(string text, string language);
+    }
+
+    public interface IARESLiveAudioOutput
+    {
+        bool TryPlayPcm(byte[] pcm);
+        void Flush();
+    }
+
+    public enum ARESLiveConnectionState
+    {
+        Disconnected,
+        Connecting,
+        Connected,
+        Listening,
+        Speaking,
+        Error
     }
 
     public sealed class ARESResourceScanResult

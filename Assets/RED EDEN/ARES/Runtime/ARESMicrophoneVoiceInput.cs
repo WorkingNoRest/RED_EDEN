@@ -1,15 +1,15 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RedEden.ARES
 {
     /// <summary>
-    /// Press V once: starts listening. It stops automatically after you finish speaking
-    /// (silence detection), or earlier if V is pressed again. The audio is transcribed offline.
+    /// Supports the existing offline capture flow and low-latency PCM streaming for Live sessions.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class ARESMicrophoneVoiceInput : MonoBehaviour, IARESVoiceInput
+    public sealed class ARESMicrophoneVoiceInput : MonoBehaviour, IARESVoiceInput, IARESStreamingVoiceInput
     {
         [SerializeField] private MonoBehaviour recognizerProvider;
         [SerializeField] private string microphoneDevice = "";
@@ -27,11 +27,23 @@ namespace RedEden.ARES
         private bool finishRequested;
         private bool cancelRequested;
         private Coroutine routine;
+        private Coroutine streamStartRoutine;
         private string activeDevice;
         private AudioClip activeClip;
+        private Action<byte[]> onPcm;
+        private Action<string> streamError;
+        private readonly ARESPcm16Resampler resampler = new ARESPcm16Resampler();
+        private readonly List<short> convertedSamples = new List<short>();
+        private readonly Queue<short> pendingPcm = new Queue<short>();
+        private float[] streamReadBuffer = Array.Empty<float>();
+        private float[] streamFirstReadBuffer = Array.Empty<float>();
+        private float[] streamWrapBuffer = Array.Empty<float>();
+        private int streamReadPosition;
+        private bool streaming;
 
         public ARESVoiceState State { get; private set; }
         public float CurrentLevel { get; private set; }
+        public bool IsStreaming => streaming;
 
         private void Awake()
         {
@@ -45,9 +57,74 @@ namespace RedEden.ARES
             if (routine != null)
                 StopCoroutine(routine);
             routine = null;
+            if (streamStartRoutine != null)
+                StopCoroutine(streamStartRoutine);
+            streamStartRoutine = null;
             if (State == ARESVoiceState.Listening && Microphone.IsRecording(activeDevice))
                 Microphone.End(activeDevice);
+            streaming = false;
+            onPcm = null;
+            streamError = null;
             ReleaseClip();
+            if (State != ARESVoiceState.Idle)
+                SetState(ARESVoiceState.Idle);
+        }
+
+        private void Update()
+        {
+            if (streaming)
+                ReadPcmStream();
+        }
+
+        public void BeginPcmStream(Action<byte[]> onPcmChunk, Action<string> onError)
+        {
+            if (State != ARESVoiceState.Idle || streamStartRoutine != null)
+            {
+                onError?.Invoke("ARES microphone is already busy.");
+                return;
+            }
+            if (onPcmChunk == null)
+            {
+                onError?.Invoke("ARES PCM stream callback is missing.");
+                return;
+            }
+            if (Microphone.devices == null || Microphone.devices.Length == 0)
+            {
+                onError?.Invoke("No microphone was detected.");
+                return;
+            }
+
+            activeDevice = string.IsNullOrWhiteSpace(microphoneDevice) ? null : microphoneDevice;
+            onPcm = onPcmChunk;
+            streamError = onError;
+            CurrentLevel = 0f;
+            resampler.Reset();
+            convertedSamples.Clear();
+            pendingPcm.Clear();
+            SetState(ARESVoiceState.Listening);
+            streamStartRoutine = StartCoroutine(StartPcmStream());
+        }
+
+        public void EndPcmStream()
+        {
+            if (streamStartRoutine != null)
+            {
+                StopCoroutine(streamStartRoutine);
+                streamStartRoutine = null;
+            }
+
+            if (Microphone.IsRecording(activeDevice))
+                Microphone.End(activeDevice);
+            streaming = false;
+            resampler.Flush(convertedSamples);
+            EnqueueConvertedSamples();
+            EmitPcmChunks(true);
+            ReleaseClip();
+            onPcm = null;
+            streamError = null;
+            resampler.Reset();
+            convertedSamples.Clear();
+            pendingPcm.Clear();
             if (State != ARESVoiceState.Idle)
                 SetState(ARESVoiceState.Idle);
         }
@@ -87,8 +164,162 @@ namespace RedEden.ARES
 
         public void CancelCapture()
         {
+            if (streaming || streamStartRoutine != null)
+            {
+                CancelPcmStream();
+                return;
+            }
             if (State == ARESVoiceState.Listening)
                 cancelRequested = true;
+        }
+
+        private IEnumerator StartPcmStream()
+        {
+            activeClip = Microphone.Start(activeDevice, true, 1, sampleRate);
+            if (activeClip == null)
+            {
+                FailPcmStream("ARES could not open the microphone.");
+                yield break;
+            }
+
+            float waitStart = Time.realtimeSinceStartup;
+            while (Microphone.GetPosition(activeDevice) <= 0)
+            {
+                if (Time.realtimeSinceStartup - waitStart > 3f)
+                {
+                    FailPcmStream("The microphone did not start recording.");
+                    yield break;
+                }
+                yield return null;
+            }
+
+            streamReadPosition = Microphone.GetPosition(activeDevice);
+            streaming = true;
+            streamStartRoutine = null;
+        }
+
+        private void ReadPcmStream()
+        {
+            if (activeClip == null || !Microphone.IsRecording(activeDevice))
+            {
+                FailPcmStream("ARES microphone stream stopped unexpectedly.");
+                return;
+            }
+
+            int position = Microphone.GetPosition(activeDevice);
+            if (position < 0 || position >= activeClip.samples)
+                return;
+            int available = (position - streamReadPosition + activeClip.samples) % activeClip.samples;
+            if (available > activeClip.samples / 2)
+            {
+                FailPcmStream("ARES microphone stream overran its capture buffer.");
+                return;
+            }
+
+            int framesPerRead = Mathf.Max(1, activeClip.frequency / 50);
+            int channels = Mathf.Max(1, activeClip.channels);
+            while (available > 0)
+            {
+                int frames = Mathf.Min(available, framesPerRead);
+                int firstFrames = Mathf.Min(frames, activeClip.samples - streamReadPosition);
+                int firstLength = firstFrames * channels;
+                int totalLength = frames * channels;
+                EnsureBuffer(ref streamReadBuffer, totalLength);
+                EnsureBuffer(ref streamFirstReadBuffer, firstLength);
+                if (!activeClip.GetData(streamFirstReadBuffer, streamReadPosition))
+                {
+                    FailPcmStream("ARES could not read microphone samples.");
+                    return;
+                }
+                Array.Copy(streamFirstReadBuffer, streamReadBuffer, firstLength);
+
+                if (firstFrames < frames)
+                {
+                    int remainingFrames = frames - firstFrames;
+                    int remainingLength = remainingFrames * channels;
+                    EnsureBuffer(ref streamWrapBuffer, remainingLength);
+                    if (!activeClip.GetData(streamWrapBuffer, 0))
+                    {
+                        FailPcmStream("ARES could not read wrapped microphone samples.");
+                        return;
+                    }
+                    Array.Copy(streamWrapBuffer, 0, streamReadBuffer, firstLength, remainingLength);
+                }
+
+                convertedSamples.Clear();
+                resampler.Convert(streamReadBuffer, channels, activeClip.frequency, convertedSamples);
+                EnqueueConvertedSamples();
+                EmitPcmChunks(false);
+                CurrentLevel = ComputeRms(streamReadBuffer);
+                streamReadPosition = (streamReadPosition + frames) % activeClip.samples;
+                available -= frames;
+            }
+        }
+
+        private void EnqueueConvertedSamples()
+        {
+            for (int i = 0; i < convertedSamples.Count; i++)
+                pendingPcm.Enqueue(convertedSamples[i]);
+            convertedSamples.Clear();
+        }
+
+        private void EmitPcmChunks(bool includePartial)
+        {
+            const int samplesPerChunk = 320;
+            while (pendingPcm.Count >= samplesPerChunk || (includePartial && pendingPcm.Count > 0))
+            {
+                int sampleCount = Mathf.Min(samplesPerChunk, pendingPcm.Count);
+                byte[] pcm = new byte[sampleCount * 2];
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    short sample = pendingPcm.Dequeue();
+                    pcm[i * 2] = (byte)(sample & 0xff);
+                    pcm[i * 2 + 1] = (byte)((sample >> 8) & 0xff);
+                }
+                onPcm?.Invoke(pcm);
+            }
+        }
+
+        private void FailPcmStream(string message)
+        {
+            if (Microphone.IsRecording(activeDevice))
+                Microphone.End(activeDevice);
+            streaming = false;
+            streamStartRoutine = null;
+            ReleaseClip();
+            resampler.Reset();
+            convertedSamples.Clear();
+            pendingPcm.Clear();
+            Action<string> error = streamError;
+            onPcm = null;
+            streamError = null;
+            if (State != ARESVoiceState.Idle)
+                SetState(ARESVoiceState.Idle);
+            error?.Invoke(message);
+        }
+
+        private void CancelPcmStream()
+        {
+            if (streamStartRoutine != null)
+                StopCoroutine(streamStartRoutine);
+            streamStartRoutine = null;
+            if (Microphone.IsRecording(activeDevice))
+                Microphone.End(activeDevice);
+            streaming = false;
+            ReleaseClip();
+            onPcm = null;
+            streamError = null;
+            resampler.Reset();
+            convertedSamples.Clear();
+            pendingPcm.Clear();
+            if (State != ARESVoiceState.Idle)
+                SetState(ARESVoiceState.Idle);
+        }
+
+        private static void EnsureBuffer(ref float[] buffer, int requiredLength)
+        {
+            if (buffer.Length != requiredLength)
+                buffer = new float[requiredLength];
         }
 
         private IEnumerator CaptureRoutine(Action<string> onTranscript, Action<string> onError)

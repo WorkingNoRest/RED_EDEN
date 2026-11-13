@@ -22,18 +22,23 @@ namespace RedEden.ARES
         private IARESGameSettingsProvider gameSettings;
         private IARESSurvivalVitalsSource vitalsSource;
         private IARESVoiceInput voiceInput;
+        private IARESStreamingVoiceInput streamingVoiceInput;
         private IARESVoiceOutput voiceOutput;
         private bool requestInProgress;
         private bool testPanelOpen;
+        private bool holdingTalkKey;
+        private bool liveActivityStarted;
         private ARESVoiceState voiceState;
         private string testInputText = string.Empty;
         private string lastDisplayedResponse = string.Empty;
+        private string latestLiveTranscript = string.Empty;
 
         private void Awake()
         {
             gameSettings = gameSettingsProvider as IARESGameSettingsProvider;
             vitalsSource = vitalsSourceProvider as IARESSurvivalVitalsSource;
             voiceInput = voiceInputProvider as IARESVoiceInput;
+            streamingVoiceInput = voiceInputProvider as IARESStreamingVoiceInput;
             voiceOutput = voiceOutputProvider as IARESVoiceOutput;
 
             if (gameSettingsProvider != null && gameSettings == null)
@@ -42,6 +47,8 @@ namespace RedEden.ARES
                 Debug.LogError("ARES vitals component does not implement IARESSurvivalVitalsSource.", vitalsSourceProvider);
             if (voiceInputProvider != null && voiceInput == null)
                 Debug.LogError("ARES voice input component does not implement IARESVoiceInput.", voiceInputProvider);
+            if (geminiLiveClient != null && voiceInputProvider != null && streamingVoiceInput == null)
+                Debug.LogError("ARES Live voice input must implement IARESStreamingVoiceInput.", voiceInputProvider);
             if (voiceOutputProvider != null && voiceOutput == null)
                 Debug.LogError("ARES voice output component does not implement IARESVoiceOutput.", voiceOutputProvider);
         }
@@ -52,6 +59,11 @@ namespace RedEden.ARES
             ARESEventBus.ResponseReceived += OnResponseReceived;
             ARESEventBus.TextInputRequested += OnTextInputRequested;
             ARESEventBus.VoiceStateChanged += OnVoiceStateChanged;
+            if (geminiLiveClient != null)
+            {
+                geminiLiveClient.InputTranscriptReceived += OnLiveInputTranscript;
+                geminiLiveClient.StateChanged += OnLiveConnectionStateChanged;
+            }
         }
 
         private void OnDisable()
@@ -60,18 +72,41 @@ namespace RedEden.ARES
             ARESEventBus.ResponseReceived -= OnResponseReceived;
             ARESEventBus.TextInputRequested -= OnTextInputRequested;
             ARESEventBus.VoiceStateChanged -= OnVoiceStateChanged;
+            if (geminiLiveClient != null)
+            {
+                geminiLiveClient.InputTranscriptReceived -= OnLiveInputTranscript;
+                geminiLiveClient.StateChanged -= OnLiveConnectionStateChanged;
+            }
+            holdingTalkKey = false;
+            liveActivityStarted = false;
             voiceInput?.CancelCapture();
+            if (geminiLiveClient != null)
+                geminiLiveClient.Disconnect();
             requestInProgress = false;
         }
 
         private void Update()
         {
+            if (geminiLiveClient != null)
+            {
+                if (WasInteractionKeyPressed())
+                    BeginLiveSpeech();
+                if (WasInteractionKeyReleased())
+                    EndLiveSpeech();
+                return;
+            }
+
             if (WasInteractionKeyPressed())
                 BeginInteraction();
         }
 
         public void BeginInteraction()
         {
+            if (geminiLiveClient != null)
+            {
+                BeginLiveSpeech();
+                return;
+            }
             if (requestInProgress)
                 return;
             if (voiceInput != null)
@@ -97,6 +132,11 @@ namespace RedEden.ARES
 
         public void SubmitText(string text)
         {
+            if (geminiLiveClient != null)
+            {
+                PublishError("Text chat is disabled while Gemini Live voice is configured. Hold V to speak.");
+                return;
+            }
             if (string.IsNullOrWhiteSpace(text))
             {
                 PublishError("ARES received an empty query.");
@@ -147,26 +187,15 @@ namespace RedEden.ARES
                 string errorMessage = null;
                 string responseText = null;
 
-                if (geminiLiveClient != null)
+                if (localBridge == null)
                 {
-                    string gameContext = ARESGameBridge.BuildRuntimeSnapshot() +
-                        "\nNASA archive evidence:\n" + retrieval.SystemInstruction;
-                    yield return geminiLiveClient.Ask(query, language, gameContext,
-                        result => responseText = result,
-                        error => errorMessage = error);
+                    PublishError("ARES local LLM bridge is not assigned.");
+                    yield break;
                 }
-                else
-                {
-                    if (localBridge == null)
-                    {
-                        PublishError("ARES local LLM bridge is not assigned.");
-                        yield break;
-                    }
 
-                    yield return localBridge.GenerateResponse(retrieval.SystemInstruction, query,
-                        result => responseText = result,
-                        error => errorMessage = error);
-                }
+                yield return localBridge.GenerateResponse(retrieval.SystemInstruction, query,
+                    result => responseText = result,
+                    error => errorMessage = error);
 
                 if (!string.IsNullOrWhiteSpace(errorMessage))
                     PublishError(errorMessage);
@@ -193,7 +222,7 @@ namespace RedEden.ARES
                 return;
 
             lastDisplayedResponse = response.Text;
-            if (voiceOutput != null)
+            if (geminiLiveClient == null && voiceOutput != null)
                 voiceOutput.Speak(response.Text, GetResponseLanguage());
         }
 
@@ -214,6 +243,124 @@ namespace RedEden.ARES
         private void HandleInputError(string message)
         {
             PublishError(string.IsNullOrWhiteSpace(message) ? "ARES voice input failed." : message);
+        }
+
+        private void BeginLiveSpeech()
+        {
+            if (holdingTalkKey)
+                return;
+            holdingTalkKey = true;
+            latestLiveTranscript = string.Empty;
+            if (streamingVoiceInput == null)
+            {
+                holdingTalkKey = false;
+                HandleInputError("ARES Live requires a microphone component that supports PCM streaming.");
+                return;
+            }
+
+            if (geminiLiveClient.IsReady)
+            {
+                StartLiveActivity();
+                return;
+            }
+            if (geminiLiveClient.IsConnecting)
+                return;
+
+            StartCoroutine(geminiLiveClient.Connect(
+                GetResponseLanguage(),
+                StartLiveActivity,
+                message =>
+                {
+                    holdingTalkKey = false;
+                    HandleInputError(message);
+                }));
+        }
+
+        private void StartLiveActivity()
+        {
+            if (!holdingTalkKey || geminiLiveClient == null)
+                return;
+            if (!geminiLiveClient.BeginUserActivity())
+            {
+                holdingTalkKey = false;
+                HandleInputError("ARES could not start a Live voice activity.");
+                return;
+            }
+
+            liveActivityStarted = true;
+            streamingVoiceInput.BeginPcmStream(
+                chunk => geminiLiveClient.SendPcm(chunk),
+                HandleLiveMicrophoneError);
+        }
+
+        private void EndLiveSpeech()
+        {
+            if (!holdingTalkKey)
+                return;
+            holdingTalkKey = false;
+            if (streamingVoiceInput != null && streamingVoiceInput.IsStreaming)
+                streamingVoiceInput.EndPcmStream();
+            else if (liveActivityStarted && streamingVoiceInput != null)
+                streamingVoiceInput.EndPcmStream();
+
+            if (!liveActivityStarted)
+                return;
+            if (geminiLiveClient == null || !geminiLiveClient.IsReady)
+            {
+                liveActivityStarted = false;
+                return;
+            }
+
+            AddLocalArchiveEvidence();
+            geminiLiveClient.EndUserActivity();
+            liveActivityStarted = false;
+        }
+
+        private void HandleLiveMicrophoneError(string message)
+        {
+            if (liveActivityStarted && geminiLiveClient != null && geminiLiveClient.IsReady)
+                geminiLiveClient.EndUserActivity();
+            liveActivityStarted = false;
+            holdingTalkKey = false;
+            HandleInputError(string.IsNullOrWhiteSpace(message) ? "ARES microphone streaming failed." : message);
+        }
+
+        private void OnLiveInputTranscript(string transcript, bool interim)
+        {
+            if (!string.IsNullOrWhiteSpace(transcript))
+                latestLiveTranscript = transcript.Trim();
+        }
+
+        private void OnLiveConnectionStateChanged(ARESLiveConnectionState state)
+        {
+            if (state != ARESLiveConnectionState.Error)
+                return;
+            holdingTalkKey = false;
+            liveActivityStarted = false;
+            voiceInput?.CancelCapture();
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+                EndLiveSpeech();
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused)
+                EndLiveSpeech();
+        }
+
+        private void AddLocalArchiveEvidence()
+        {
+            if (ragHandler == null || !ragHandler.LoadCompleted || !ragHandler.IsLoaded ||
+                string.IsNullOrWhiteSpace(latestLiveTranscript))
+                return;
+
+            ARESRAGHandler.RetrievalResult retrieval = ragHandler.Retrieve(latestLiveTranscript, GetResponseLanguage());
+            if (retrieval.HasSupportingRecords)
+                geminiLiveClient.SendArchiveEvidence(retrieval.SystemInstruction);
         }
 
         private void PublishResponse(string text, bool isError)
@@ -260,9 +407,21 @@ namespace RedEden.ARES
 #endif
         }
 
+        private bool WasInteractionKeyReleased()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null &&
+                Keyboard.current.vKey.wasReleasedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKeyUp(KeyCode.V);
+#else
+            return false;
+#endif
+        }
+
         private void OnGUI()
         {
-            if (!showTestInputUI || !testPanelOpen)
+            if (geminiLiveClient != null || !showTestInputUI || !testPanelOpen)
                 return;
 
             float width = Mathf.Min(460f, Screen.width - 32f);
