@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1afa3cfb14630c8499240b568c0d4c38, type: 3}
+  m_Name: ARESProvisioningConfiguration
+  m_EditorClassIdentifier: RedEden.ARES::RedEden.ARES.ARESProvisioningConfiguration
+  bridgeConfiguration: {fileID: 11400000, guid: f7ae0b53b38f4936a788a3d8b6403c16, type: 2}
+  useBundledOllama: 1
+  serverStartTimeoutSeconds: 40
+  keepAlive: 30m
+  requiredFiles:
+  - displayName: Offline speech recognition model
+    fileName: ggml-small.bin
+    url: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
+    minimumBytes: 400000000

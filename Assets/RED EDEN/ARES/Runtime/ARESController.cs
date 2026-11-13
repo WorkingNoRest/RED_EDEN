@@ -12,6 +12,7 @@ namespace RedEden.ARES
         [SerializeField] private ARESSystemConfiguration configuration;
         [SerializeField] private ARESRAGHandler ragHandler;
         [SerializeField] private ARESLocalBridge localBridge;
+        [SerializeField] private ARESGeminiLiveClient geminiLiveClient;
         [SerializeField] private MonoBehaviour gameSettingsProvider;
         [SerializeField] private MonoBehaviour vitalsSourceProvider;
         [SerializeField] private MonoBehaviour voiceInputProvider;
@@ -143,24 +144,36 @@ namespace RedEden.ARES
                     yield break;
                 }
 
-                if (localBridge == null)
-                {
-                    PublishError("ARES local LLM bridge is not assigned.");
-                    yield break;
-                }
-
                 string errorMessage = null;
                 string responseText = null;
-                yield return localBridge.GenerateResponse(retrieval.SystemInstruction, query,
-                    result => responseText = result,
-                    error => errorMessage = error);
+
+                if (geminiLiveClient != null)
+                {
+                    string gameContext = ARESGameBridge.BuildRuntimeSnapshot() +
+                        "\nNASA archive evidence:\n" + retrieval.SystemInstruction;
+                    yield return geminiLiveClient.Ask(query, language, gameContext,
+                        result => responseText = result,
+                        error => errorMessage = error);
+                }
+                else
+                {
+                    if (localBridge == null)
+                    {
+                        PublishError("ARES local LLM bridge is not assigned.");
+                        yield break;
+                    }
+
+                    yield return localBridge.GenerateResponse(retrieval.SystemInstruction, query,
+                        result => responseText = result,
+                        error => errorMessage = error);
+                }
 
                 if (!string.IsNullOrWhiteSpace(errorMessage))
                     PublishError(errorMessage);
                 else if (!string.IsNullOrWhiteSpace(responseText))
                     PublishResponse(responseText, false);
                 else
-                    PublishError("ARES local LLM completed without a response.");
+                    PublishError("ARES completed the request without a response.");
             }
             finally
             {
